@@ -112,3 +112,8 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.card:hover{
+  box-shadow: 8px 8px 8px #4e79a720 !important;
+  transform:scale(1.05);
+}
