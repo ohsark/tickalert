@@ -151,7 +151,7 @@ $("input[id='inclforecast']").change(e => {
             x : "date",
             y : "forecast",
             width: getdim("#forecastcont").width,
-            height: getdim("#forecastcont").height*0.2 ,
+            height: getdim("#forecastcont").height*0.25,
             color: "#4e79a7",
             div: "#forecastanomalies",
             forecastdate: new Date("2022-01-01"),

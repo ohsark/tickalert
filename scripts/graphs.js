@@ -844,7 +844,7 @@ function forecastanomalies(data, {
             .text("↑ Above Average"))
 		.call(g => g.append("text")
             .attr("x", 5)
-            .attr("y", 99)
+            .attr("y", height - marginBottom - 5)
             .attr("fill", "currentColor")
             .attr("text-anchor", "start")
             .text("↓ Below Average"));
