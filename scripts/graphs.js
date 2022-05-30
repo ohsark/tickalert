@@ -516,9 +516,9 @@ function forecast(data, {
     yType = d3.scaleLinear, // type of y-scale
     yDomain, // [ymin, ymax]
     yRange = [height - marginBottom, marginTop], // [bottom, top]
-  	xLabel = "Time",
+	xLabel = "Date →",
+	yLabel = "↑ Total",
     yFormat, // a format specifier string for the y-axis
-    yLabel, // a label for the y-axis
     color = "currentColor", // fill color of area
 	  strokeLinecap = "round", // stroke line cap of the line
     strokeLinejoin = "round", // stroke line join of the line
@@ -685,12 +685,13 @@ function forecastanomalies(data, {
     yType = d3.scaleLinear, // type of y-scale
     yDomain, // [ymin, ymax]
     yRange = [height - marginBottom, marginTop], // [bottom, top]
-    yLabel, // a label for the y-axis
 	strokeLinecap = "round", // stroke line cap of the line
     strokeLinejoin = "round", // stroke line join of the line
     strokeWidth = 1.5, // stroke width of line, in pixels
     strokeOpacity = 1, // stroke opacity of line
     div,
+	xLabel = "Date →",
+	yLabel = "↑ Total",
     forecastdate,
 	forecast
   } = {}) {

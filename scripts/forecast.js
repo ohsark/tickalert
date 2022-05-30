@@ -73,9 +73,7 @@ function populatepage(region) {
         height: getdim("#forecastcont").height*0.5,
         color: "#4e79a7",
         div: "#forecastspread",
-        forecastdate: new Date("2022-01-01"),
-        xLabel: "Date →",
-        yLabel: "↑ Total"
+        forecastdate: new Date("2022-01-01")
     })
 
     // forecasttrend({trend: regiondata[selected]["trends"], date: regiondata[selected]["horizon"]}, {
@@ -93,12 +91,10 @@ function populatepage(region) {
         x : "date",
         y : "forecast",
         width: getdim("#forecastcont").width,
-        height: getdim("#forecastcont").height*0.2 ,
+        height: getdim("#forecastcont").height*0.25,
         color: "#4e79a7",
         div: "#forecastanomalies",
-        forecastdate: new Date("2022-01-01"),
-        xLabel: "Date →",
-        yLabel: "↑ Total"
+        forecastdate: new Date("2022-01-01")
     })
 
 }
