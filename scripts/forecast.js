@@ -42,17 +42,16 @@ function populatepage(region) {
         y: "y",
         width: getdim("#percentageworsecont").width,
         height: getdim("#percentageworsecont").height - 20,
-        yLabel: "↑ Daily close ($)",
         percentage: String(regiondata[selected]["gauge"][0] * 100) + "%",
         color: "#4e79a7"  
     })
 
     if(regiondata[selected]["gauge"][0] < 0.4) {
-        $("#increasechance").text("LOW").css("color", "#4e79a7")
+        $("#increasechance").text(String(Math.round(regiondata[selected]["gauge"][0] * 100)) + "%").css("color", "#4e79a7")
     } else if (regiondata[selected]["gauge"][0] > 0.4 && regiondata[selected]["gauge"][0] < 0.7) {
-        $("#increasechance").text("Less Likely").css("color", "#f28e2c")
+        $("#increasechance").text(String(Math.round(regiondata[selected]["gauge"][0] * 100)) + "%").css("color", "#f28e2c")
     } else {
-        $("#increasechance").text("HIGH").css("color", "#e15759")
+        $("#increasechance").text(String(Math.round(regiondata[selected]["gauge"][0] * 100)) + "%").css("color", "#e15759")
     }
     
 
@@ -62,7 +61,7 @@ function populatepage(region) {
         yFormat: "%",
         yLabel: "↑ Probability",
         width: getdim("#thresholdcont").width,
-        height: getdim("#thresholdcont").height - 110,
+        height: getdim("#thresholdcont").height - 90,
         color: "#4e79a7"
     })
     
@@ -70,7 +69,7 @@ function populatepage(region) {
         x : "date",
         y : "forecast",
         width: getdim("#forecastcont").width,
-        height: getdim("#forecastcont").height*0.5,
+        height: getdim("#forecastcont").height*0.55,
         color: "#4e79a7",
         div: "#forecastspread",
         forecastdate: new Date("2022-01-01")
@@ -115,9 +114,9 @@ $("input[id='inclforecast']").change(e => {
         forecast({forecast: regiondata[selected]["forecast"][0], date: regiondata[selected]["horizon"], fit: regiondata[selected]["forecastPoints"]}, {
             x : "date",
             y : "forecast",
-            yLabel: "↑ Monthly Total",
+            yLabel: "↑ Total",
             width: getdim("#forecastcont").width,
-            height: getdim("#forecastcont").height*0.5,
+            height: getdim("#forecastcont").height*0.55,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: new Date("2022-01-01"),
@@ -138,9 +137,9 @@ $("input[id='inclforecast']").change(e => {
         forecast({forecast: regiondata[selected]["forecast"][0], date: regiondata[selected]["horizon"], fit: regiondata[selected]["forecastPoints"]}, {
             x : "date",
             y : "forecast",
-            yLabel: "↑ Monthly Total",
+            yLabel: "↑ Total",
             width: getdim("#forecastcont").width,
-            height: getdim("#forecastcont").height*0.5,
+            height: getdim("#forecastcont").height*0.55,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: new Date("2022-01-01"),
@@ -188,7 +187,7 @@ $("input[name='threshold']").change(e => {
         yFormat: "%",
         yLabel: "↑ Frequency",
         width: getdim("#thresholdcont").width,
-        height: getdim("#thresholdcont").height - 110,
+        height: getdim("#thresholdcont").height - 90,
         color: "#4e79a7"
     })
 })

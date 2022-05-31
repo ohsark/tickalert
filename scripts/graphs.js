@@ -520,7 +520,7 @@ function forecast(data, {
 	yLabel = "↑ Total",
     yFormat, // a format specifier string for the y-axis
     color = "currentColor", // fill color of area
-	  strokeLinecap = "round", // stroke line cap of the line
+	strokeLinecap = "round", // stroke line cap of the line
     strokeLinejoin = "round", // stroke line join of the line
     strokeWidth = 1.5, // stroke width of line, in pixels
     strokeOpacity = 1, // stroke opacity of line
@@ -588,7 +588,11 @@ function forecast(data, {
 			.attr("width", width)
 			.attr("height", height)
 			.attr("viewBox", [0, 0, width, height])
-			.attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+			.attr("style", "max-width: 100%; height: auto; height: intrinsic;overflow: visible")
+			.on("pointerenter", pointerentered)
+			.on("pointermove", pointermoved)
+			.on("pointerleave", pointerleft)
+			.on("touchstart", event => event.preventDefault());;
 
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
@@ -622,13 +626,28 @@ function forecast(data, {
 			.attr("d", area95(I.slice(0,73)));
 		
 		svg.append("line")
-			.attr("x1", xScale(forecastdate))  //<<== change your code here
+			.attr("x1", xScale(forecastdate)) 
 			.attr("y1", 0)
-			.attr("x2", xScale(forecastdate))  //<<== and here
+			.attr("x2", xScale(forecastdate)) 
 			.attr("y2", height - marginBottom)
 				.style("stroke-width", 2)
 				.style("stroke", "#ddd")
 				.style("fill", "none");
+		
+		svg.append("text")
+			.attr("x", xScale(forecastdate) + 10) 
+			.attr("y", marginBottom)
+				.style("font-weight", "bold")
+				.style("fill", "#4e79a7")
+			.text("Forecast →")
+				
+
+		svg.append("text")
+			.attr("x", xScale(forecastdate) - 115) 
+			.attr("y", marginBottom)
+				.style("font-weight", "bold")
+				.style("fill", "#aaa")
+			.text("← Model Train")
 
 		svg.append("g")
 			.attr("fill", "#000")
@@ -665,6 +684,70 @@ function forecast(data, {
         .attr("stroke-linejoin", strokeLinejoin)
         .attr("stroke-opacity", strokeOpacity)
         .attr("d", line(I.slice(72)));
+
+	const info = svg.append("g")
+        .attr("class", "focus zindex-tooltip")
+        .attr("display", "none")
+		.attr("overflow", "visible");
+  
+    info.append("line")
+		.attr("x1", 0) 
+		.attr("y1", 0)
+		.attr("x2", 0) 
+		.attr("y2", height - marginBottom)
+			.style("stroke-width", 1)
+			.style("stroke", "#000")
+			.style("fill", "none");
+
+    info.append("rect")
+        .attr("class", "conf-desc")
+        .attr("width", 100)
+        .attr("height", 70)
+        .attr("x", 5)
+        .attr("y", 0)
+        .attr("rx", 4)
+        .attr("ry", 4)
+		.attr("fill", "#fff")
+		.attr("stroke", "#333");
+  
+    info.append("text")
+        .attr("class", "tooltip-date")
+        .attr("x", 10)
+        .attr("y", 18);
+	
+	info.append("text")
+        .attr("class", "tooltip-main")
+        .attr("x", 10)
+        .attr("y", 40)
+		.attr("font-weight", "bold")
+		.attr("font-size", "1.1rem");
+  
+    info.append("text")
+        .attr("class", "tooltip-conf")
+        .attr("x", 10)
+        .attr("y", 60);
+  
+    function pointermoved(event) {
+      const [xm, ym] = d3.pointer(event);
+      const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(l5[i]) - ym)); // closest point
+      info.attr("transform", `translate(${xScale(X[i])},${0})`);
+      info.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
+	  info.select(".tooltip-main").text(l50[i]);
+      info.select(".tooltip-conf").text("[" + l5[i] + "-" + l95[i] + "]");
+    }
+  
+    function pointerentered() {
+    //   path.style("mix-blend-mode", null).style("stroke", "#ddd");
+      info.attr("display", null);
+    }
+  
+    function pointerleft() {
+    //   path.style("mix-blend-mode", "multiply").style("stroke", null);
+      info.attr("display", "none");
+      svg.node().value = null;
+      svg.dispatch("input", {bubbles: true});
+    }
+    
 
     return svg.node();
 }
@@ -705,29 +788,29 @@ function forecastanomalies(data, {
     const l70 = data[y][6];
     const l80 = data[y][7];
     const l95 = data[y][8];
-	let anomabove0 = 0
+	// let anomabove0 = 0
 	
     const X = d3.map(data[x], d => new Date(d))
     const I = d3.range(X.length)
 
-	I.slice(72).forEach(i => {
-		console.log(l50[i])
-		if(l50[i] > 0) {
-			anomabove0++
-		} else {
-			anomabove0--
-		}
-	})
+	// I.slice(72).forEach(i => {
+	// 	console.log(l50[i])
+	// 	if(l50[i] > 0) {
+	// 		anomabove0++
+	// 	} else {
+	// 		anomabove0--
+	// 	}
+	// })
 
-	if(anomabove0 > 0) {
-		d3.select("#anomaliestext")
-			.style("color", "#e15759")
-			.text("Total for most of the months is above the average showing an upward trend in the tick cases for next year.")
-	} else {
-		d3.select("#anomaliestext")
-			.style("color", "#4e79a7")
-			.text("Total for most of the months is below the average showing a downward trend in the tick cases for next year.")			
-	}
+	// if(anomabove0 > 0) {
+	// 	d3.select("#anomaliestext")
+	// 		.style("color", "#e15759")
+	// 		.text("Total for most of the months is above the average showing an upward trend in the tick cases for next year.")
+	// } else {
+	// 	d3.select("#anomaliestext")
+	// 		.style("color", "#4e79a7")
+	// 		.text("Total for most of the months is below the average showing a downward trend in the tick cases for next year.")			
+	// }
 	
     if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(72) : X)
     if (yDomain === undefined) yDomain = [-1,1];

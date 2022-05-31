@@ -41,8 +41,8 @@
                 <div class="py-1 h-100">
                     <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100 " id="forecastcont" >
                         <div>
-                            <b class="h6 fw-bold heading">Forecast for Tick Paralysis amongst dogs</b>
-                            <p class="m-0 para">Predictions are made using unsupervised machine learning algorthms taking into consideration numerous co-variants such as enviormental measures, actively-collated clinicals records and search histories. </p>
+                            <b class="h6 fw-bold heading">Forecasting canine tick paralysis admissions</b>
+                            <p class="m-0 para">'We simulate the tick paralysis admissions time series 10,000 times to see what kinds of trends are possible. The summary below gives an idea of the range of scenarios our model thinks is possible.</p>
                         </div>
                         <div class="d-flex flex-row justify-content-end align-items-center">
                             <p class="my-0 mx-2 h6">Forecast only</p>
@@ -52,13 +52,13 @@
                             </label>
                         </div>
                         
-                        <div id="forecastspread"></div>
-                        
-                        <div id="forecastanomalies"></div>
+                        <div id="forecastspread" style="overflow: visible;z-index: 100000;"></div>
                         <div>
-                            <b class="fw-bold heading" style="font-size: 1rem !important;">How deviated will be the total cases each month?</b>
-                            <p class="m-0 para">Shown below the forecast are the anomalies for the predicted total each month for the year. <span id="anomaliestext"></span></p>
+                            <b class="fw-bold heading" style="font-size: 1rem !important;">How does the forecast compare to the long-term average?</b>
+                            <!-- <p class="m-0 para">Shown below the forecast are the anomalies for the predicted total each month for the year. <span id="anomaliestext"></span></p> -->
                         </div>
+                        <div id="forecastanomalies"></div>
+                        
                     </div>
                 </div>
 
@@ -83,7 +83,7 @@
             <div class="py-1" style="height:25%">
                 <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100" id="percentageworsecont" >
                     <div>
-                        <b class="h6 fw-bold heading">Chance of increase in tick cases next year is <span id="increasechance"></span></b>
+                        <b class="h6 fw-bold heading">Chance of an increase in tick cases for next year is <i id="increasechance"></i></b>
                         <p class="m-0 para"></p>
                     </div>
                     <div id="percentageworse"></div>
@@ -93,7 +93,7 @@
                 <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100" id="thresholdcont" >
                     <div>
                         <b class="h6 fw-bold heading">Will tick cases increase beyond a threshold?</b>
-                        <p class="m-0 para">The probability of having more than the selected nummber of tick cases in a month of the predicted year.</p>
+                        <p class="m-0 para">Case threshold:</p>
                     </div>
                     <div class="d-inline-flex my-2">
                         <span>

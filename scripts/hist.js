@@ -217,7 +217,7 @@ function tickcases(tickcasecomp, tickcasetype) {
                 x: d => new Date(d.date),
                 y: d => d.n,
                 z: d => d.strat,
-                height: dim.height - 130,
+                height: dim.height - 100,
                 width: dim.width,
                 color: "#4e79a7",
                 div: "#tickcases",
