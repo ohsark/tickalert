@@ -3,8 +3,70 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
-.main-content {
-  position: fixed;top: 50px;right: 0;left: 0;bottom: 0;
+
+
+@media only screen and (min-width:992px) {
+  .main-content {
+    position: fixed;top: 50px;right: 0;left: 0;bottom: 0;
+  }
+  #tickcasescontainer {
+    margin-bottom: 0px;
+  }
+}
+
+@media (max-width:992px) {
+  #tickcasescontainer {
+    height: 400px !important;
+    margin-bottom: -80px;
+  }
+
+  .graphoptions {
+    display: inline-block !important;
+  }
+
+  #percentageworse {
+    height: 200px !important;
+    
+  }
+
+  #thresholdprobability {
+    height: 300px !important;
+  }
+
+  #forecastspread {
+    height: 350px !important;
+  }
+
+  #forecastanomalies {
+    height: 150px !important;
+  }
+
+}
+
+@media (max-width:576px) {
+  #forecastspread {
+    height: 420px !important;
+  }
+
+  #forecastcont {
+    padding-bottom: 80px !important;
+  }
+
+  #thresholdcont {
+    padding-bottom: 15px !important;
+  }
+
+  #percentageworsecont {
+    padding-bottom: 25px !important;
+  }
+
+  #forecastanomalies {
+    height: 100px !important;
+  }
+
+  .height-0 {
+    height: 100% !important;
+  }
 }
 
 .histoptions > label {

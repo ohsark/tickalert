@@ -76,7 +76,7 @@ function percentageworse(data, {
 		.attr("d", area(I))
 
 	svg.append("text")
-		.attr("x", 125)
+		.attr("x", width / 3 - 40)
 		.attr("y", height -10)
 		.attr("fill", "currentColor")
 		.attr("text-anchor", "start")
