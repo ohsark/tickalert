@@ -100,7 +100,7 @@ function populatepage(region) {
 
 $("body").on("click", "div[aria-labelledby='region-selector'] a", e => {
     region = e.target.text
-    $("#regionselectheader").text(region)
+    $("#regionselectheader").text(region + ", Qld")
     populatepage(region)
 })
 

@@ -30,7 +30,7 @@
     <nav class="navbar navbar-light border-0 border-bottom py-1" style="height: 50px;">
       <div class="container-fluid ">
         <div class="navbar-brand mb-0 fs-5 fw-bold align-items-center"><span class="text-danger">Tick </span><span>Alert</span><i class="fa-solid fa-shield-dog ms-2"></i> </div>
-        <span class="text-secondary h5">Tick Paralysis Forecast</span>
+        <span class="text-secondary h5 page-title">Tick Paralysis Forecast</span>
 			</div>
     </nav>
 		
@@ -43,7 +43,7 @@
                     <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100 " id="forecastcont" >
                         <div>
                             <b class="h6 fw-bold heading">Forecasting canine tick paralysis admissions</b>
-                            <p class="m-0 para">'We simulate the tick paralysis admissions time series 10,000 times to see what kinds of trends are possible. The summary below gives an idea of the range of scenarios our model thinks is possible.</p>
+                            <p class="m-0 para">We simulate the tick paralysis admissions time series 10,000 times to see what kinds of trends are possible. The summary below gives an idea of the range of scenarios our model thinks is possible.</p>
                         </div>
                         <div class="d-flex flex-row justify-content-end align-items-center">
                             <p class="my-0 mx-2 h6">Forecast only</p>
@@ -93,7 +93,7 @@
             <div class="py-1" style="height:65%">
                 <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100" id="thresholdcont" >
                     <div>
-                        <b class="h6 fw-bold heading">Will tick cases increase beyond a threshold?</b>
+                        <b class="h6 fw-bold heading">Will next year's cases exceed a threshold?</b>
                         <p class="m-0 para">Case threshold:</p>
                     </div>
                     <div class="d-inline-flex my-2">
@@ -144,7 +144,7 @@
             .then(data => {
             
             regiondata = data
-            $("#regionselectheader").text(regiondata[selected].region[0])
+            $("#regionselectheader").text(regiondata[selected].region[0] + ", Qld")
             data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-center h4' href='#''>" + v.region[0] +"</a>"))
             populatepage(regiondata[selected].region[0])
         })

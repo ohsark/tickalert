@@ -221,8 +221,8 @@ function tickcases(tickcasecomp, tickcasetype) {
                 width: dim.width,
                 color: "#4e79a7",
                 div: "#tickcases",
-                xLabel: "Date →",
-                yLabel: "↑ Total"
+                xLabel: comb.includes("year") ? "Year →" : "Date →",
+                yLabel: "↑ Total",
             })
 
         })

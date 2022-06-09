@@ -96,8 +96,8 @@ function linechart(data, {
     marginRight = 30, // right margin, in pixels
     marginBottom = 30, // bottom margin, in pixels
     marginLeft = 40, // left margin, in pixels
-    width = 500, // outer width, in pixels
-    height = 400, // outer height, in pixels
+    width, // outer width, in pixels
+    height, // outer height, in pixels
     xType = d3.scaleUtc, // type of x-scale
     xDomain, // [xmin, xmax]
     xRange = [marginLeft, width - marginRight], // [left, right]
@@ -114,7 +114,8 @@ function linechart(data, {
     strokeWidth = 2.5, // stroke width of line
     strokeOpacity, // stroke opacity of line
     mixBlendMode = "multiply", // blend mode of lines
-    div
+    div,
+	tickFormat
   } = {}) {
     // Compute values.
     const X = d3.map(data, x);
@@ -124,7 +125,7 @@ function linechart(data, {
     if (defined === undefined) defined = (d, i) => !isNaN(Y[i]);
     const D = d3.map(data, defined);
     d3.select(div).select("svg").remove()
-  
+	console.log(d3.map(data, x))
     // Compute default domains, and unique the z-domain.
     if (xDomain === undefined) xDomain = d3.extent(X);
     if (yDomain === undefined) yDomain = [0, d3.max(Y, d => typeof d === "string" ? +d : d)];
@@ -139,7 +140,7 @@ function linechart(data, {
     // Construct scales and axes.
     const xScale = xType(xDomain, xRange);
     const yScale = yType(yDomain, yRange);
-    const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
+    const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0).tickFormat(tickFormat);
     const yAxis = div == "#trend" || div == "#seasonal" ? d3.axisLeft(yScale) : d3.axisLeft(yScale).ticks(height / 60, yFormat);
     
   
@@ -279,8 +280,8 @@ function anomalieschart(data, {
     marginRight = 10, // right margin, in pixels
     marginBottom = 30, // bottom margin, in pixels
     marginLeft = 20, // left margin, in pixels
-    width = 640, // outer width, in pixels
-    height = 400, // outer height, in pixels
+    width, // outer width, in pixels
+    height, // outer height, in pixels
     xType = d3.scaleUtc, // type of x-scale
     xDomain, // [xmin, xmax]
     xRange = [marginLeft, width - marginRight], // [left, right]
@@ -1329,8 +1330,8 @@ function gauge(div, w, data) {
     marginRight = 0, // the right margin, in pixels
     marginBottom = 30, // the bottom margin, in pixels
     marginLeft = 40, // the left margin, in pixels
-    width = 640, // the outer width of the chart, in pixels
-    height = 400, // the outer height of the chart, in pixels
+    width, // the outer width of the chart, in pixels
+    height, // the outer height of the chart, in pixels
     xDomain, // an array of (ordinal) x-values
     xRange = [marginLeft, width - marginRight], // [left, right]
     yType = d3.scaleLinear, // y-scale type
