@@ -54,7 +54,7 @@ function populatepage(region) {
         $("#increasechance").text(String(Math.round(regiondata[selected]["gauge"][0] * 100)) + "%").css("color", "#e15759")
     }
     
-
+    $("#thresholdheading").text("3 or more cases?")
     thresholds({probs: regiondata[selected]["thresholds"][0], date: regiondata[selected]["months"]}, {
         x: "date",
         y: "probs",
@@ -164,15 +164,19 @@ $("input[name='threshold']").change(e => {
 
     switch(threshold) {
         case "thresholdone":
+            $("#thresholdheading").text("3 or more cases?")
             selection = 0
             break;
         case "thresholdtwo":
+            $("#thresholdheading").text("6 or more cases?")
             selection = 1
             break;
         case "thresholdthree":
+            $("#thresholdheading").text("9 or more cases?")
             selection = 2
             break;
         case "thresholdfour":
+            $("#thresholdheading").text("12 or more cases?")
             selection = 3
             break;
         default:
