@@ -39,40 +39,100 @@
         
     <!-- <script src="./script.js"></script> -->
     <script>
-       
-        fetch('./data/aus_lga_map.geojson')
+        let lga_totals;
+
+        fetch('./data/lga_totals.json')
             .then(response => response.json())
             .then(data => {
-                let map = L.map('map').setView([147.0967,-36.0406 ], 13),
-                vector = L.geoJson(data, {
-                    onEachFeature: (feature, layer) => {
-                        layer.on("click", (e, d) => {
-                            console.log(e.target.feature.properties)
+                lga_totals = data
+                lgas = data.map(i => i.LGACode)
+                console.log(lgas)
+                fetch('./data/lga_map.geojson')
+                    .then(response => response.json())
+                    .then(data => {
+                        data = data.features.map(lga => {
+                            if(lgas.includes(lga.properties.LGA_CODE20)) {
+                                lga.properties.total = lga_totals.filter(i => i.LGACode == lga.properties.LGA_CODE20)[0].total
+                            } else {
+                                lga.properties.total = NaN
+                            }
+                            return lga
                         })
-                        layer.on("mouseover", (e, d) => {
-                            layer.setStyle({
-                                fillColor: "#EC5858"
-                            })
-                        })
-                        layer.on("mouseout", (e, d) => {
-                            layer.setStyle({
-                                fillColor: "#DCBCBC"
-                            })
-                        })
-                    },
-                    style: {
-                        color: "#EC5858",
-                        weight: 1,
-                        fillColor: "#DCBCBC",
-                        fillOpacity: 1
-                    }
-                }).addTo(map); 
-                map.fitBounds(vector.getBounds());
-                // vector.bindPopup(function (layer) {
-                //     return layer.feature.properties.description;
-                // }) 
+                        let maxTotal = Math.max(...lga_totals.map(i => i.total))
+                        console.log(maxTotal)
+                        let map = L.map('map').setView([147.0967,-36.0406 ], 13),
+                        vector = L.geoJson(data, {
+                            onEachFeature: (feature, layer) => {
+                                let style;
+
+                                let getColor = v => {
+                                    return  v > 1000 ? '#800026' :
+                                            v > 500  ? '#BD0026' :
+                                            v > 200  ? '#E31A1C' :
+                                            v > 100  ? '#FC4E2A' :
+                                            v > 50   ? '#FD8D3C' :
+                                            v > 20   ? '#FEB24C' :
+                                            v > 10   ? '#FED976' :
+                                                        '#FFEDA0';
+                                }
+
+                                if(feature.properties.total)  {
+                                    style = {
+                                        // fillColor: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")",
+                                        // color: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")"
+                                        fillColor: getColor(feature.properties.total),
+                                        color: getColor(feature.properties.total) 
+                                    }
+                                } else {
+                                    style = {
+                                        fillColor: "#eee",
+                                        color: "#fff",
+                                        dashArray: "5",
+                                        fillOpacity: 0.7                                    
+                                    }
+                                }
+                                layer.setStyle(style)
+                                // AREASQKM20: 256.3162
+// LGA_CODE20: "99399"
+// LGA_NAME20: "Unincorp. Other Territories"
+// STE_CODE16: "9" 
+// STE_NAME16: "Other Territories"
+// rmapshaperid: 543
+// total: NaN
+                                layer.bindTooltip("<div><b>" + feature.properties.LGA_NAME20 + "</b><div>Total:<b>" + feature.properties.total + "</b></div></div>").openTooltip();
+                                // layer.on("click", (e, d) => {
+                                //     // console.log(e.target.feature.properties.total)
+                                // })
+                                // layer.on("mouseover", (e, d) => {
+                                //     layer.setStyle({
+                                //         fillColor: "rgba(236, 88, 88, " + (e.target.feature.properties.total/maxTotal).toFixed(2)  + ")"
+                                //     })
+                                // })
+                                // layer.on("mouseout", (e, d) => {
+                                //     layer.setStyle({
+                                //         fillColor: "#DCBCBC"
+                                //     })
+                                // })
+                            },
+                            style: {
+                                // color: "#EC5858",
+                                // color: "#eee",
+                                weight: 2,
+                                // fillColor: "#FFF",
+                                fillColor: "#fff",
+                                fillOpacity: 1
+                            }
+                        }).addTo(map); 
+                        map.fitBounds(vector.getBounds());
+                        // vector.bindPopup(function (layer) {
+                        //     return layer.feature.properties.description;
+                        // }) 
+                    })
+                    .catch(error => console.log(error));
             })
-            .catch(error => console.log(error));
+
+        
+       
     </script>
   </body>
 </html>
