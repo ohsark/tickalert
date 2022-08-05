@@ -76,6 +76,39 @@
                                                         '#FFEDA0';
                                 }
 
+                                let zoomToFeature = (e) => {
+                                    map.fitBounds(e.target.getBounds());
+                                }
+
+                                let highlightFeature = (e) => {
+                                    let layer = e.target;
+
+                                    layer.setStyle({
+                                        weight: 3,
+                                        color: '#666',
+                                        dashArray: '',
+                                        fillOpacity: 0.7
+                                    });
+                                    
+                                    layer.bindTooltip("<div><b>" + feature.properties.LGA_NAME20 + "</b><div>Total:<b>" + feature.properties.total + "</b></div></div>").openTooltip()
+
+                                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                                        layer.bringToFront();
+                                    }
+
+                                }
+
+                                let resetHighlight = (e) => {
+                                    let layer = e.target;
+                                    layer.setStyle({
+                                        fillColor: getColor(feature.properties.total),
+                                        color: getColor(feature.properties.total) ,
+                                        weight: 1,
+                                        fillOpacity: 1
+                                    });
+                                    layer.closeTooltip()
+                                }
+
                                 if(feature.properties.total)  {
                                     style = {
                                         // fillColor: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")",
@@ -92,27 +125,13 @@
                                     }
                                 }
                                 layer.setStyle(style)
-                                // AREASQKM20: 256.3162
-// LGA_CODE20: "99399"
-// LGA_NAME20: "Unincorp. Other Territories"
-// STE_CODE16: "9" 
-// STE_NAME16: "Other Territories"
-// rmapshaperid: 543
-// total: NaN
-                                layer.bindTooltip("<div><b>" + feature.properties.LGA_NAME20 + "</b><div>Total:<b>" + feature.properties.total + "</b></div></div>").openTooltip();
-                                // layer.on("click", (e, d) => {
-                                //     // console.log(e.target.feature.properties.total)
-                                // })
-                                // layer.on("mouseover", (e, d) => {
-                                //     layer.setStyle({
-                                //         fillColor: "rgba(236, 88, 88, " + (e.target.feature.properties.total/maxTotal).toFixed(2)  + ")"
-                                //     })
-                                // })
-                                // layer.on("mouseout", (e, d) => {
-                                //     layer.setStyle({
-                                //         fillColor: "#DCBCBC"
-                                //     })
-                                // })
+                                layer.on({
+                                    mouseover: highlightFeature,
+                                    mouseout: resetHighlight,
+                                    click: zoomToFeature
+                                });
+
+                                
                             },
                             style: {
                                 // color: "#EC5858",
@@ -123,6 +142,8 @@
                                 fillOpacity: 1
                             }
                         }).addTo(map); 
+
+                    
                         map.fitBounds(vector.getBounds());
                         // vector.bindPopup(function (layer) {
                         //     return layer.feature.properties.description;
