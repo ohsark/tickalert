@@ -21,6 +21,25 @@
         .map-container {
             background-color: #ddd;
         }
+        .legend {
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+        .info {
+            padding: 6px 8px;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgb(0 0 0 / 20%);
+            border-radius: 5px;
+        }
     </style>
   </head>
   <body>
@@ -58,6 +77,17 @@
                             }
                             return lga
                         })
+                        let getColor = v => {
+                            return  v > 1000 ? '#800026' :
+                                    v > 500  ? '#BD0026' :
+                                    v > 200  ? '#E31A1C' :
+                                    v > 100  ? '#FC4E2A' :
+                                    v > 50   ? '#FD8D3C' :
+                                    v > 20   ? '#FEB24C' :
+                                    v > 10   ? '#FED976' :
+                                                '#FFEDA0';
+                        }
+
                         let maxTotal = Math.max(...lga_totals.map(i => i.total))
                         console.log(maxTotal)
                         let map = L.map('map').setView([147.0967,-36.0406 ], 13),
@@ -65,17 +95,7 @@
                             onEachFeature: (feature, layer) => {
                                 let style;
 
-                                let getColor = v => {
-                                    return  v > 1000 ? '#800026' :
-                                            v > 500  ? '#BD0026' :
-                                            v > 200  ? '#E31A1C' :
-                                            v > 100  ? '#FC4E2A' :
-                                            v > 50   ? '#FD8D3C' :
-                                            v > 20   ? '#FEB24C' :
-                                            v > 10   ? '#FED976' :
-                                                        '#FFEDA0';
-                                }
-
+                                
                                 let zoomToFeature = (e) => {
                                     map.fitBounds(e.target.getBounds());
                                 }
@@ -85,7 +105,7 @@
 
                                     layer.setStyle({
                                         weight: 3,
-                                        color: '#666',
+                                        color: '#777',
                                         dashArray: '',
                                         fillOpacity: 0.7
                                     });
@@ -100,28 +120,30 @@
 
                                 let resetHighlight = (e) => {
                                     let layer = e.target;
+                                    layer.closeTooltip()
                                     layer.setStyle({
-                                        fillColor: getColor(feature.properties.total),
-                                        color: getColor(feature.properties.total) ,
+                                        fillColor: feature.properties.total ? getColor(feature.properties.total) : "#efefef",
+                                        color: "#fff",
                                         weight: 1,
                                         fillOpacity: 1
                                     });
-                                    layer.closeTooltip()
-                                }
+                                    // data.resetStyle(layer)
+                                     
+                                }         
 
                                 if(feature.properties.total)  {
                                     style = {
                                         // fillColor: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")",
                                         // color: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")"
                                         fillColor: getColor(feature.properties.total),
-                                        color: getColor(feature.properties.total) 
+                                        // color: getColor(feature.properties.total),
+                                        weight:1
                                     }
                                 } else {
                                     style = {
-                                        fillColor: "#eee",
+                                        fillColor: "#efefef",
                                         color: "#fff",
-                                        dashArray: "5",
-                                        fillOpacity: 0.7                                    
+                                        // dashArray: "5",                                   
                                     }
                                 }
                                 layer.setStyle(style)
@@ -135,14 +157,33 @@
                             },
                             style: {
                                 // color: "#EC5858",
-                                // color: "#eee",
-                                weight: 2,
+                                color: "#fff",
+                                weight: 1,
                                 // fillColor: "#FFF",
                                 fillColor: "#fff",
                                 fillOpacity: 1
                             }
                         }).addTo(map); 
 
+                        let legend = L.control({position: 'bottomright'});
+
+                        legend.onAdd = function (map) {
+
+                            var div = L.DomUtil.create('div', 'info legend'),
+                                grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                                labels = [];
+
+                            // loop through our density intervals and generate a label with a colored square for each interval
+                            for (var i = 0; i < grades.length; i++) {
+                                div.innerHTML +=
+                                    '<i style="background-color:' + getColor(grades[i] + 1) + '"></i> ' +
+                                    grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+                            }
+
+                            return div;
+                        };
+
+                        legend.addTo(map);
                     
                         map.fitBounds(vector.getBounds());
                         // vector.bindPopup(function (layer) {
