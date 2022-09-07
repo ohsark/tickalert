@@ -220,7 +220,7 @@ function tickcases(tickcasecomp, tickcasetype, div) {
                 height: dim.height ? dim.height - 100 : 300,
                 width: dim.width ? dim.width : 100,
                 color: "#4e79a7",
-                div: "#" + div,
+                div: "#tickcases",
                 xLabel: comb.includes("year") ? "Year →" : "Date →",
                 yLabel: "↑ Total",
             })
