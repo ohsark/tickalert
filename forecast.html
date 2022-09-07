@@ -73,9 +73,9 @@
                 <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100">
                     <div class="dropdown">
                         <button class="btn btn-outline dropdown-toggle w-100 h-100 mt-1" type="button" id="region-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <span class="h4 m-0" id="regionselectheader">Region</span>
+                          <span class="h5 m-0" id="regionselectheader">Region</span>
                         </button>
-                        <div class="dropdown-menu w-100" aria-labelledby="region-selector" id="regionselectoptions">
+                        <div class="dropdown-menu w-100 overflow-auto" style="height: 300px;" aria-labelledby="region-selector" id="regionselectoptions">
                             
                         </div>
                       </div>
@@ -137,17 +137,17 @@
         
     
     <script>
-        let selected = 0
+        let lgadata = []
         let regiondata
 
-        fetch("./data/predictions.json")
+        fetch("./data/predictions_updated_27series.json")
             .then(response => response.json())
             .then(data => {
             
             regiondata = data
-            $("#regionselectheader").text(regiondata[selected].region[0] + ", Qld")
-            data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-center h4' href='#''>" + v.region[0] +"</a>"))
-            populatepage(regiondata[selected].region[0])
+            selectedLGA = regiondata[0].lga
+            data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-center h5' data-lga='" + v.lga + "' href='#''>" + v.region + " - " + v.lga  +"</a>"))
+            populatepage(selectedLGA)
         })
 
 

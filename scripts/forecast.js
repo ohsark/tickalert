@@ -1,34 +1,14 @@
 function populatepage(region) {
-    
-    switch(region) {
-        case "Brisbane":
-            selected = 0
-            break;
 
-        case "Gold Coast":
-            selected = 1
-            break;
+    lgadata = regiondata.filter(l => {
+        if(l.lga == region) {
+            console.log(l.lga)
+            return l
+        }
+    })[0]
+    console.log(lgadata)
 
-        case "Logan":
-            selected = 2
-            break;
-
-        case "Noosa":
-            selected = 3
-            break;
-
-        case "Sunshine Coast":
-            selected = 4
-            break;
-
-        case "Toowoomba":
-            selected = 5
-            break;
-
-        default:
-            selected = 1
-            break;
-    }
+    $("#regionselectheader").text(lgadata.region + " | " + lgadata.lga)
 
     d3.select("#percentageworse").select("svg").remove()
     d3.select("#forecastspread").select("svg").remove()
@@ -36,26 +16,28 @@ function populatepage(region) {
     d3.select("#thresholdprobability").select("svg").remove()
 
 
-    // gauge("#gauge", 300, {value: Math.round(data[selected]["gauge"][0] * 100)})
+    // gauge("#gauge", 300, {value: Math.round(data[selected]["gauge"] * 100)})
     percentageworse({x:[1,2,3,4,5,6,7], y:[0,0.75,3,7,3,0.75,0]}, {
         x: "x",
         y: "y",
         width: getdim("#percentageworsecont").width,
         height: getdim("#percentageworsecont").height - 20,
-        percentage: String(regiondata[selected]["gauge"][0] * 100) + "%",
+        percentage: String(lgadata["gauge"] * 100) + "%",
         color: "#4e79a7"  
     })
 
-    if(regiondata[selected]["gauge"][0] < 0.4) {
-        $("#increasechance").text(String(Math.round(regiondata[selected]["gauge"][0] * 100)) + "%").css("color", "#4e79a7")
-    } else if (regiondata[selected]["gauge"][0] > 0.4 && regiondata[selected]["gauge"][0] < 0.7) {
-        $("#increasechance").text(String(Math.round(regiondata[selected]["gauge"][0] * 100)) + "%").css("color", "#f28e2c")
+    // console.log(lgadata)
+
+    if(lgadata["gauge"] < 0.4) {
+        $("#increasechance").text(String(Math.round(lgadata["gauge"] * 100)) + "%").css("color", "#4e79a7")
+    } else if (lgadata["gauge"] > 0.4 && lgadata["gauge"] < 0.7) {
+        $("#increasechance").text(String(Math.round(lgadata["gauge"] * 100)) + "%").css("color", "#f28e2c")
     } else {
-        $("#increasechance").text(String(Math.round(regiondata[selected]["gauge"][0] * 100)) + "%").css("color", "#e15759")
+        $("#increasechance").text(String(Math.round(lgadata["gauge"] * 100)) + "%").css("color", "#e15759")
     }
     
     $("#thresholdheading").text("3 or more cases?")
-    thresholds({probs: regiondata[selected]["thresholds"][0], date: regiondata[selected]["months"]}, {
+    thresholds({probs: lgadata["thresholds"][0], date: lgadata["months"]}, {
         x: "date",
         y: "probs",
         yFormat: "%",
@@ -65,7 +47,7 @@ function populatepage(region) {
         color: "#4e79a7"
     })
     
-    forecast({forecast: regiondata[selected]["forecast"][0], date: regiondata[selected]["horizon"], fit: regiondata[selected]["forecastPoints"]}, {
+    forecast({forecast: lgadata["forecast"][0], date: lgadata["horizon"], fit: lgadata["forecastPoints"]}, {
         x : "date",
         y : "forecast",
         width: getdim("#forecastcont").width,
@@ -75,7 +57,7 @@ function populatepage(region) {
         forecastdate: new Date("2022-01-01")
     })
 
-    // forecasttrend({trend: regiondata[selected]["trends"], date: regiondata[selected]["horizon"]}, {
+    // forecasttrend({trend: lgadata["trends"], date: lgadata["horizon"]}, {
     //     x : "date",
     //     y : "trend",
     //     yLabel: "↑ Monthly Total",
@@ -86,7 +68,7 @@ function populatepage(region) {
     //     forecastdate: new Date("2022-01-01")
     // })
 
-    forecastanomalies({forecast: regiondata[selected]["anomalies"], date: regiondata[selected]["horizon"]}, {
+    forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
         x : "date",
         y : "forecast",
         width: getdim("#forecastcont").width,
@@ -99,9 +81,8 @@ function populatepage(region) {
 }
 
 $("body").on("click", "div[aria-labelledby='region-selector'] a", e => {
-    region = e.target.text
-    $("#regionselectheader").text(region + ", Qld")
-    populatepage(region)
+    
+    populatepage(e.target.dataset.lga)
 })
 
 $("input[id='inclforecast']").change(e => {
@@ -111,7 +92,7 @@ $("input[id='inclforecast']").change(e => {
     d3.select("#forecastanomalies").select("svg").remove()
     
     if(include) {
-        forecast({forecast: regiondata[selected]["forecast"][0], date: regiondata[selected]["horizon"], fit: regiondata[selected]["forecastPoints"]}, {
+        forecast({forecast: lgadata["forecast"][0], date: lgadata["horizon"], fit: lgadata["forecastPoints"]}, {
             x : "date",
             y : "forecast",
             yLabel: "↑ Total",
@@ -123,7 +104,7 @@ $("input[id='inclforecast']").change(e => {
             forecast: true
         })
     
-        forecastanomalies({forecast: regiondata[selected]["anomalies"], date: regiondata[selected]["horizon"]}, {
+        forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
             x : "date",
             y : "forecast",
             width: getdim("#forecastcont").width,
@@ -134,7 +115,7 @@ $("input[id='inclforecast']").change(e => {
             forecast: true
         })
     } else {
-        forecast({forecast: regiondata[selected]["forecast"][0], date: regiondata[selected]["horizon"], fit: regiondata[selected]["forecastPoints"]}, {
+        forecast({forecast: lgadata["forecast"][0], date: lgadata["horizon"], fit: lgadata["forecastPoints"]}, {
             x : "date",
             y : "forecast",
             yLabel: "↑ Total",
@@ -146,7 +127,7 @@ $("input[id='inclforecast']").change(e => {
             
         })
     
-        forecastanomalies({forecast: regiondata[selected]["anomalies"], date: regiondata[selected]["horizon"]}, {
+        forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
             x : "date",
             y : "forecast",
             width: getdim("#forecastcont").width,
@@ -185,7 +166,7 @@ $("input[name='threshold']").change(e => {
 
     d3.select("#thresholdprobability").select("svg").remove()
     // console.log(selection)
-    thresholds({probs: regiondata[selected]["thresholds"][selection], date: regiondata[selected]["months"]}, {
+    thresholds({probs: lgadata["thresholds"][selection], date: lgadata["months"]}, {
         x: "date",
         y: "probs",
         yFormat: "%",

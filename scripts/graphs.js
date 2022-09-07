@@ -540,12 +540,15 @@ function forecast(data, {
     const l70 = data[y][6];
     const l80 = data[y][7];
     const l95 = data[y][8];
-	const modelFit = data["fit"]
+	  const modelFit = data["fit"]
 	
     const X = d3.map(data[x], d => new Date(d))
     const I = d3.range(X.length)
+
+    let forecaststart = data[x].indexOf("2022-01-01")
+    // let forecastperiod = data[x].length - data[x].indexOf("2022-01-01")
 	
-    if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(72) : X)
+    if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(forecaststart) : X)
     if (yDomain === undefined) yDomain = [d3.min(d3.map(data[y], d => d3.min(d))) < 0 ? d3.min(d3.map(data[y], d => d3.min(d))) : 0, d3.max(d3.map(data[y], d => d3.max(d)))];
     // Construct scales and axes.
 
@@ -624,7 +627,7 @@ function forecast(data, {
 	if (!forecast) {
 		svg.append("path")
 			.attr("fill", "#ddd")
-			.attr("d", area95(I.slice(0,73)));
+			.attr("d", area95(I.slice(0,forecaststart + 1)));
 		
 		svg.append("line")
 			.attr("x1", xScale(forecastdate)) 
@@ -653,7 +656,7 @@ function forecast(data, {
 		svg.append("g")
 			.attr("fill", "#000")
 			.selectAll("circle")
-			.data(I.slice(0,71))
+			.data(I.slice(0,forecaststart))
 			.join("circle")
 				.attr("cx", i => xScale(X[i]))
 				.attr("cy", i => yScale(modelFit[i]))
@@ -663,19 +666,19 @@ function forecast(data, {
 
 	svg.append("path")
 		.attr("fill", "#d5eeff")
-		.attr("d", area95(I.slice(72)));
+		.attr("d", area95(I.slice(forecaststart)));
 
     svg.append("path")
 		.attr("fill", "#bcd8ec")
-		.attr("d", area80(I.slice(72)));
+		.attr("d", area80(I.slice(forecaststart)));
 	
 	svg.append("path")
 		.attr("fill", "#a4c3d8")
-		.attr("d", area70(I.slice(72)));
+		.attr("d", area70(I.slice(forecaststart)));
 
 	svg.append("path")
 		.attr("fill", "#8baec6")
-		.attr("d", area60(I.slice(72)));
+		.attr("d", area60(I.slice(forecaststart)));
 	
 	svg.append("path")
         .attr("fill", "none")
@@ -684,7 +687,7 @@ function forecast(data, {
         .attr("stroke-linecap", strokeLinecap)
         .attr("stroke-linejoin", strokeLinejoin)
         .attr("stroke-opacity", strokeOpacity)
-        .attr("d", line(I.slice(72)));
+        .attr("d", line(I.slice(forecaststart)));
 
 	const info = svg.append("g")
         .attr("class", "focus zindex-tooltip")
@@ -791,10 +794,12 @@ function forecastanomalies(data, {
     const l95 = data[y][8];
 	// let anomabove0 = 0
 	
+    let forecaststart = data[x].indexOf("2022-01-01")
+
     const X = d3.map(data[x], d => new Date(d))
     const I = d3.range(X.length)
 
-	// I.slice(72).forEach(i => {
+	// I.slice(forecaststart).forEach(i => {
 	// 	console.log(l50[i])
 	// 	if(l50[i] > 0) {
 	// 		anomabove0++
@@ -813,7 +818,7 @@ function forecastanomalies(data, {
 	// 		.text("Total for most of the months is below the average showing a downward trend in the tick cases for next year.")			
 	// }
 	
-    if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(72) : X)
+    if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(forecaststart) : X)
     if (yDomain === undefined) yDomain = [-1,1];
     // Construct scales and axes.
     const xScale = xType(xDomain, xRange);
@@ -872,24 +877,24 @@ function forecastanomalies(data, {
 
 	svg.append("path")
 		.attr("fill", "#d5eeff")
-		.attr("d", area95(forecast ? I.slice(72) : I));
+		.attr("d", area95(forecast ? I.slice(forecaststart) : I));
 		
     svg.append("path")
 		.attr("fill", "#bcd8ec")
-		.attr("d", area80(forecast ? I.slice(72) : I));
+		.attr("d", area80(forecast ? I.slice(forecaststart) : I));
 	
 	svg.append("path")
 		.attr("fill", "#a4c3d8")
-		.attr("d", area70(forecast ? I.slice(72) : I));
+		.attr("d", area70(forecast ? I.slice(forecaststart) : I));
 
 	svg.append("path")
 		.attr("fill", "#8baec6")
-		.attr("d", area60(forecast ? I.slice(72) : I));
+		.attr("d", area60(forecast ? I.slice(forecaststart) : I));
 
 	if(!forecast) {
 		svg.append("path")
 		.attr("fill", "#ccc")
-		.attr("d", area95(I.slice(0,73)));
+		.attr("d", area95(I.slice(0,forecaststart+1)));
 	}
 
 
@@ -901,7 +906,7 @@ function forecastanomalies(data, {
         .attr("stroke-linecap", strokeLinecap)
         .attr("stroke-linejoin", strokeLinejoin)
         .attr("stroke-opacity", strokeOpacity)
-        .attr("d", line(I.slice(72)));
+        .attr("d", line(I.slice(forecaststart)));
 
 	svg.append("line")
 		.attr("x1", xScale(forecastdate))  //<<== change your code here
@@ -1348,7 +1353,7 @@ function gauge(div, w, data) {
   
     // Compute default domains, and unique the x-domain.
     if (xDomain === undefined) xDomain = X;
-    if (yDomain === undefined) yDomain = [0, d3.max(Y)];
+    if (yDomain === undefined) yDomain = [0, 1];
     xDomain = new d3.InternSet(xDomain);
   
     // Omit any data not present in the x-domain.

@@ -154,7 +154,7 @@ function tickadmissions(tickadmcomp, tickadmtype) {
             link = "./data/overall_monthly_admissions.json"
     }
     fetch(link)
-        .then(response => response.json())
+        .then(response => response.json())  
         .then(data => {
             let dim = getdim("#tickadmscontainer")
             linechart(data, {
@@ -173,7 +173,7 @@ function tickadmissions(tickadmcomp, tickadmtype) {
 
 }
 
-function tickcases(tickcasecomp, tickcasetype) {
+function tickcases(tickcasecomp, tickcasetype, div) {
     let link = ""
     let comb = tickcasecomp + "~" + tickcasetype
     
@@ -217,10 +217,10 @@ function tickcases(tickcasecomp, tickcasetype) {
                 x: d => new Date(d.date),
                 y: d => d.n,
                 z: d => d.strat,
-                height: dim.height - 100,
-                width: dim.width,
+                height: dim.height ? dim.height - 100 : 300,
+                width: dim.width ? dim.width : 100,
                 color: "#4e79a7",
-                div: "#tickcases",
+                div: "#" + div,
                 xLabel: comb.includes("year") ? "Year →" : "Date →",
                 yLabel: "↑ Total",
             })
