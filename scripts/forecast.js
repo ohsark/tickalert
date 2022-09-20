@@ -217,6 +217,7 @@ fetch('./data/lga_totals.json')
                             // $("#map").css('width', '60%')
                             map.fitBounds(e.target.getBounds());
                             populatepage(e.target.feature.properties.LGA_CODE20)
+                            $("#regionselectheader").text(e.target.feature.properties.LGA_NAME20 + " | " + e.target.feature.properties.LGA_CODE20)
                         }
 
                         let highlightFeature = (e) => {
