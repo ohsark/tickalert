@@ -168,7 +168,7 @@ function linechart(data, {
         .call(xAxis)
         .call(g => g.append("text")
             .attr("x", width - marginRight - 10)
-            .attr("y",35)
+            .attr("y",25)
             .attr("font-size", "1.25em")
             .attr("font-weight", "600")
             .attr("fill", "currentColor")
@@ -176,6 +176,7 @@ function linechart(data, {
             .text(xLabel));
         
   
+
     svg.append("g")
         .attr("transform", `translate(${marginLeft},0)`)
         .call(yAxis)
@@ -602,8 +603,8 @@ function forecast(data, {
         .attr("transform", `translate(0,${height - marginBottom})`)
         .call(xAxis)
 		.call(g => g.append("text")
-            .attr("x", width - marginRight - 22)
-            .attr("y",20)
+            .attr("x", width - marginRight )
+            .attr("y",35)
             .attr("font-size", "1.25em")
             .attr("font-weight", "600")
             .attr("fill", "currentColor")
@@ -660,8 +661,9 @@ function forecast(data, {
 			.join("circle")
 				.attr("cx", i => xScale(X[i]))
 				.attr("cy", i => yScale(modelFit[i]))
-				.attr("r", 3)
-
+				.attr("r", i => modelFit[i] == "NA" ? 0 : 3.5)
+        .attr("stroke", "white")
+        .attr("stroke-width", 1.5)
 	}
 
 	svg.append("path")

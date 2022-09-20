@@ -40,7 +40,7 @@
 
             <div class="col-lg-8 h-100 px-1">
                 <div class="py-1 h-100">
-                    <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100 " id="forecastcont" >
+                    <div class="bg-white border p-2 border-light rounded rounded-3 shadow-sm h-100 " id="forecastcont" >
                         <div>
                             <b class="h6 fw-bold heading">Forecasting canine tick paralysis admissions</b>
                             <p class="m-0 para">We simulate the tick paralysis admissions time series 10,000 times to see what kinds of trends are possible. The summary below gives an idea of the range of scenarios our model thinks is possible.</p>
@@ -54,7 +54,7 @@
                         </div>
                         
                         <div id="forecastspread" style="overflow: visible;z-index: 100000;"></div>
-                        <div>
+                        <div class="mb-2 mt-3">
                             <b class="fw-bold heading forechead" style="font-size: 1rem !important;">How does the forecast compare to the long-term average?</b>
                             <!-- <p class="m-0 para">Shown below the forecast are the anomalies for the predicted total each month for the year. <span id="anomaliestext"></span></p> -->
                         </div>
@@ -69,7 +69,7 @@
         
 
         <div class="col-lg-4 h-100 px-1 order-first">
-            <div class="py-1 " style="height:10%">
+            <!-- <div class="py-1 " style="height:10%">
                 <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100">
                     <div class="dropdown">
                         <button class="btn btn-outline dropdown-toggle w-100 h-100 mt-1" type="button" id="region-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -89,9 +89,12 @@
                     </div>
                     <div id="percentageworse"></div>
                 </div>
+            </div> -->
+            <div class="py-1" style="height:50%">
+                <div id="map" class="h-100" style="background-color: #9bbff4;"></div>
             </div>
-            <div class="py-1" style="height:65%">
-                <div class="bg-white border px-2 py-1 border-light rounded rounded-3 shadow-sm h-100" id="thresholdcont" >
+            <div class="py-1" style="height:50%">
+                <div class="bg-white border p-2 border-light rounded rounded-3 shadow-sm h-100" id="thresholdcont" >
                     <div>
                         <!-- <b class="h6 fw-bold heading">Will next year's cases exceed a threshold?</b> -->
                         <b class="h6 heading fw-normal">When next year could we see <b id="thresholdheading"></b></b>
@@ -147,7 +150,7 @@
             regiondata = data
             selectedLGA = regiondata[0].lga
             data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-center h5' data-lga='" + v.lga + "' href='#''>" + v.region + " - " + v.lga  +"</a>"))
-            populatepage(selectedLGA)
+            populatepage("31000")
         })
 
 
