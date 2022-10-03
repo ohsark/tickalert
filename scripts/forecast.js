@@ -8,7 +8,8 @@ function populatepage(region) {
     })[0]
     console.log(lgadata)
 
-    $("#regionselectheader").text(lgadata.region + " | " + lgadata.lga)
+    $("#regionselectheader").text(lgadata.region)
+    $("#regionselectlga").text(lgadata.lga)
 
     d3.select("#percentageworse").select("svg").remove()
     d3.select("#forecastspread").select("svg").remove()
@@ -42,16 +43,18 @@ function populatepage(region) {
         y: "probs",
         yFormat: "%",
         yLabel: "↑ Probability",
-        width: getdim("#thresholdcont").width,
-        height: getdim("#thresholdcont").height - 90,
+        // width: getdim("#thresholdcont").width,
+        // height: getdim("#thresholdcont").height - 90,
+        width: getdim("#thresholdprobability").width,
+        height: getdim("#thresholdprobability").width *0.3,
         color: "#4e79a7"
     })
     
     forecast({forecast: lgadata["forecast"][0], date: lgadata["horizon"], fit: lgadata["forecastPoints"]}, {
         x : "date",
         y : "forecast",
-        width: getdim("#forecastcont").width - 60,
-        height: getdim("#forecastcont").height*0.55,
+        width: getdim("#forecastspread").width,
+        height: getdim("#forecastspread").width*0.5,
         color: "#4e79a7",
         div: "#forecastspread",
         forecastdate: new Date("2022-01-01")
@@ -71,8 +74,8 @@ function populatepage(region) {
     forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
         x : "date",
         y : "forecast",
-        width: getdim("#forecastcont").width - 60,
-        height: getdim("#forecastcont").height*0.25,
+        width: getdim("#forecastanomalies").width,
+        height: getdim("#forecastanomalies").width*0.2,
         color: "#4e79a7",
         div: "#forecastanomalies",
         forecastdate: new Date("2022-01-01")
@@ -96,8 +99,8 @@ $("input[id='inclforecast']").change(e => {
             x : "date",
             y : "forecast",
             yLabel: "↑ Total",
-            width: getdim("#forecastcont").width - 60,
-            height: getdim("#forecastcont").height*0.55,
+            width: getdim("#forecastspread").width,
+            height: getdim("#forecastspread").width*0.5,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: new Date("2022-01-01"),
@@ -107,8 +110,8 @@ $("input[id='inclforecast']").change(e => {
         forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
             x : "date",
             y : "forecast",
-            width: getdim("#forecastcont").width - 60,
-            height: getdim("#forecastcont").height*0.25 ,
+            width: getdim("#forecastanomalies").width,
+            height: getdim("#forecastanomalies").width*0.2 ,
             color: "#4e79a7",
             div: "#forecastanomalies",
             forecastdate: new Date("2022-01-01"),
@@ -119,8 +122,8 @@ $("input[id='inclforecast']").change(e => {
             x : "date",
             y : "forecast",
             yLabel: "↑ Total",
-            width: getdim("#forecastcont").width - 60,
-            height: getdim("#forecastcont").height*0.55,
+            width: getdim("#forecastspread").width ,
+            height: getdim("#forecastspread").width*0.5,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: new Date("2022-01-01"),
@@ -130,8 +133,10 @@ $("input[id='inclforecast']").change(e => {
         forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
             x : "date",
             y : "forecast",
-            width: getdim("#forecastcont").width - 60,
-            height: getdim("#forecastcont").height*0.25,
+            // width: getdim("#forecastspread").width - 60,
+            // height: getdim("#forecastspread").height*0.25,
+            width: getdim("#forecastanomalies").width,
+            height: getdim("#forecastanomalies").width*0.2,
             color: "#4e79a7",
             div: "#forecastanomalies",
             forecastdate: new Date("2022-01-01"),
@@ -171,8 +176,10 @@ $("input[name='threshold']").change(e => {
         y: "probs",
         yFormat: "%",
         yLabel: "↑ Frequency",
-        width: getdim("#thresholdcont").width,
-        height: getdim("#thresholdcont").height - 90,
+        // width: getdim("#thresholdcont").width,
+        // height: getdim("#thresholdcont").height - 90,
+        width: getdim("#thresholdprobability").width,
+        height: getdim("#thresholdprobability").width*0.3,
         color: "#4e79a7"
     })
 })
@@ -217,7 +224,8 @@ fetch('./data/lga_totals.json')
                             // $("#map").css('width', '60%')
                             map.fitBounds(e.target.getBounds());
                             populatepage(e.target.feature.properties.LGA_CODE20)
-                            $("#regionselectheader").text(e.target.feature.properties.LGA_NAME20 + " | " + e.target.feature.properties.LGA_CODE20)
+                            $("#regionselectheader").text(e.target.feature.properties.LGA_NAME20)
+                            $("#regionselectlga").text(e.target.feature.properties.LGA_CODE20)
                         }
 
                         let highlightFeature = (e) => {
