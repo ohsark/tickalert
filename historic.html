@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin=""/>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>Tick Alert</title>
+
+    </head>
+<body>
+ 
+    <div class="map-container">
+        <!-- <nav class="navbar navbar-light border-0 border-bottom py-1" style="height: 45px;">
+            <div class="container-fluid ">
+                <div class="navbar-brand mb-0 fs-5 fw-bold align-items-center pt-0"><span class="text-danger">Tick </span><span>Alert</span><i class="fa-solid fa-shield-dog ms-2"></i> </div>
+                <span class="text-secondary h5 page-title">Historic Data Analysis</span>
+            </div>
+        </nav> -->
+        <div class="row h-100" style="background-color: #9bbff4;">
+            <div class="col-5 h-100 px-0" >
+                <div class="d-flex flex-column bg-white px-2 py-3 rounded-lg rounded shadow" style="z-index: 10000; position: absolute;  top: 10px; left : 10px">
+                    <div class="mb-0 h4 font-weight-bold align-items-center"><span class="text-danger">Tick </span><span>Alert</span><i class="fa-solid fa-shield-dog ms-2"></i> </div>
+                    <!-- <span class="text-secondary h6">Tick Paralysis Forecast</span> -->
+                    <span class="text-secondary h6 mt-1 mb-0">History of Dog Tick Cases in Australia</span>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <div class="col-7 overflow-auto h-100 rounded-left rounded-lg bg-white shadow border">
+                <div class="dropdown">
+                    <button class="btn text-left px-0 btn-outline dropdown-toggle w-100 h-100 mt-3" type="button" id="region-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-align: left;">
+                        <span class="d-inline-flex flex-column"><span class="h4 inline-block m-0" id="regionselectheader"></span><span class="h6 inline-block text-secondary font-weight-bold" id="regionselectlga"></span>, <span class="h6 inline-block text-secondary font-weight-bold" id="regionselectstate"></span>
+                    </button>
+                    <div class="dropdown-menu w-100 overflow-auto" style="height: 300px;" aria-labelledby="region-selector" id="regionselectoptions">
+                        
+                    </div>
+                </div>
+
+        </div>
+    </div>
+
+	
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="./scripts/script.js"></script>
+    <script src="./scripts/graphs.js"></script>
+    <script src="./scripts/forecast.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script> 
+        
+    
+    <script>
+        let lgadata = []
+        let regiondata
+
+        fetch("./data/predictions_updated_27series.json")
+            .then(response => response.json())
+            .then(data => {
+            
+            regiondata = data
+            selectedLGA = regiondata[0].lga
+            data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-center h5' data-lga='" + v.lga + "' href='#''>" + v.region + " - " + v.lga  +"</a>"))
+            populatepage("31000")
+        })
+
+    </script>
+  </body>
+</html>

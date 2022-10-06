@@ -590,7 +590,7 @@ function forecast(data, {
         
 	const svg = d3.select(div)
 		.append("svg")
-			.attr("width", width)
+			.attr("width", width - 30)
 			.attr("height", height)
 			.attr("viewBox", [0, 0, width, height])
 			.attr("style", "max-width: 100%; height: auto; height: intrinsic;overflow: visible")
@@ -602,14 +602,14 @@ function forecast(data, {
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
         .call(xAxis)
-		.call(g => g.append("text")
-            .attr("x", width - marginRight )
-            .attr("y",35)
-            .attr("font-size", "1.25em")
-            .attr("font-weight", "600")
-            .attr("fill", "currentColor")
-            // .attr("text-anchor", "start")
-            .text(xLabel));
+		// .call(g => g.append("text")
+    //         .attr("x", width - marginRight )
+    //         .attr("y",35)
+    //         .attr("font-size", "1.25em")
+    //         .attr("font-weight", "600")
+    //         .attr("fill", "currentColor")
+    //         // .attr("text-anchor", "start")
+    //         .text(xLabel));
 		
   
     svg.append("g")
@@ -640,19 +640,34 @@ function forecast(data, {
 				.style("fill", "none");
 		
 		svg.append("text")
-			.attr("x", xScale(forecastdate) + 10) 
-			.attr("y", marginBottom)
-				.style("font-weight", "bold")
-				.style("fill", "#4e79a7")
-			.text("Forecast →")
+        .attr("x", xScale(forecastdate) + 10) 
+        .attr("y", marginBottom)
+      .style("font-weight", "bolder")
+      .style("font-size", "0.825em")
+      .style("fill", "#4e79a7")
+      .append("tspan")
+        .attr('x', xScale(forecastdate) + 10)
+			  .text("Forecast")
+      .append("tspan")
+        .attr('x', xScale(forecastdate) + 10)
+        .attr('dy', 14)
+        .text("→")
+			// .text("Forecast ")
 				
 
 		svg.append("text")
-			.attr("x", xScale(forecastdate) - 115) 
-			.attr("y", marginBottom)
-				.style("font-weight", "bold")
-				.style("fill", "#aaa")
-			.text("← Model Train")
+        .attr("x", xScale(forecastdate) - 100) 
+        .attr("y", marginBottom)
+      .style("font-weight", "bolder")
+      .style("font-size", "0.825em")
+      .style("fill", "#aaa")
+      .append("tspan")
+        .attr('x', xScale(forecastdate) - 80)
+			  .text("Model Train")
+      .append("tspan")
+        .attr('x', xScale(forecastdate) - 25)
+        .attr('dy', 14)
+        .text("←")
 
 		svg.append("g")
 			.attr("fill", "#000")
@@ -697,19 +712,18 @@ function forecast(data, {
 		.attr("overflow", "visible");
   
     info.append("line")
-		.attr("x1", 0) 
-		.attr("y1", 0)
-		.attr("x2", 0) 
-		.attr("y2", height - marginBottom)
-			.style("stroke-width", 1)
-			.style("stroke", "#000")
-			.style("fill", "none");
+      .attr("x1", 0) 
+      .attr("y1", 0)
+      .attr("x2", 0) 
+      .attr("y2", height - marginBottom)
+        .style("stroke-width", 1)
+        .style("stroke", "#000")
+        .style("fill", "none");
 
     info.append("rect")
         .attr("class", "conf-desc")
         .attr("width", 100)
         .attr("height", 70)
-        .attr("x", 5)
         .attr("y", 0)
         .attr("rx", 4)
         .attr("ry", 4)
@@ -718,28 +732,39 @@ function forecast(data, {
   
     info.append("text")
         .attr("class", "tooltip-date")
-        .attr("x", 10)
         .attr("y", 18);
 	
-	info.append("text")
+	  info.append("text")
         .attr("class", "tooltip-main")
-        .attr("x", 10)
         .attr("y", 40)
 		.attr("font-weight", "bold")
 		.attr("font-size", "1.1rem");
   
     info.append("text")
         .attr("class", "tooltip-conf")
-        .attr("x", 10)
         .attr("y", 60);
   
     function pointermoved(event) {
       const [xm, ym] = d3.pointer(event);
       const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(l5[i]) - ym)); // closest point
+     
       info.attr("transform", `translate(${xScale(X[i])},${0})`);
       info.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
-	  info.select(".tooltip-main").text(l50[i]);
+	    info.select(".tooltip-main").text(l50[i]);
       info.select(".tooltip-conf").text("[" + l5[i] + "-" + l95[i] + "]");
+      
+      if(xm > xScale(forecastdate) -60) {
+        info.select(".conf-desc").attr("x", -105);
+        info.select(".tooltip-date").attr("x", -100);
+        info.select(".tooltip-main").attr("x", -100);
+        info.select(".tooltip-conf").attr("x", -100);
+      } else {
+        info.select(".conf-desc").attr("x", 5);
+        info.select(".tooltip-date").attr("x", 10);
+        info.select(".tooltip-main").attr("x", 10);
+        info.select(".tooltip-conf").attr("x", 10);
+      }
+
     }
   
     function pointerentered() {
@@ -827,7 +852,7 @@ function forecastanomalies(data, {
     const yScale = yType(yDomain, yRange);
     const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
     const yAxis = d3.axisLeft(yScale).ticks(1);
-	
+
     // Construct an area generator.
     const area95 = d3.area()
         .curve(curve)
@@ -860,22 +885,30 @@ function forecastanomalies(data, {
         
 	const svg = d3.select(div)
 		.append("svg")
-			.attr("width", width)
+			.attr("width", width -11)
 			.attr("height", height)
 			.attr("viewBox", [0, 0, width, height])
-			.attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+			.attr("style", "max-width: 100%; height: auto; height: intrinsic;overflow: visible");
 
 	svg.append("rect")
 		.attr("width", width - marginLeft - marginRight)
-		.attr("height", "100%")
+		.attr("height", height - marginBottom )
 		.attr("fill", "#ddd")
 		.attr("x", marginLeft)
-		.attr("y", -marginBottom)		
+		.attr("y", 0)		
 		.attr("opacity", 0.25);
 
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
-        .call(xAxis);
+        .call(xAxis)
+        .call(g => g.append("text")
+            .attr("x", width - marginRight )
+            .attr("y",35)
+            .attr("font-size", "1.25em")
+            .attr("font-weight", "600")
+            .attr("fill", "currentColor")
+            // .attr("text-anchor", "start")
+            .text(xLabel));
 
 	svg.append("path")
 		.attr("fill", "#d5eeff")

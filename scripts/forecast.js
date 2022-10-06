@@ -1,3 +1,8 @@
+function setHeader(region, lga, state) {
+    $("#regionselectheader").text(region + ", " + state)
+    $("#regionselectlga").text(lga)
+}
+
 function populatepage(region) {
 
     lgadata = regiondata.filter(l => {
@@ -8,8 +13,7 @@ function populatepage(region) {
     })[0]
     console.log(lgadata)
 
-    $("#regionselectheader").text(lgadata.region)
-    $("#regionselectlga").text(lgadata.lga)
+    setHeader(lgadata.region, lgadata.lga, "QLD")
 
     d3.select("#percentageworse").select("svg").remove()
     d3.select("#forecastspread").select("svg").remove()
@@ -22,7 +26,7 @@ function populatepage(region) {
         x: "x",
         y: "y",
         width: getdim("#percentageworsecont").width,
-        height: getdim("#percentageworsecont").height - 20,
+        height: getdim("#percentageworsecont").width*0.5,
         percentage: String(lgadata["gauge"] * 100) + "%",
         color: "#4e79a7"  
     })
@@ -46,7 +50,7 @@ function populatepage(region) {
         // width: getdim("#thresholdcont").width,
         // height: getdim("#thresholdcont").height - 90,
         width: getdim("#thresholdprobability").width,
-        height: getdim("#thresholdprobability").width *0.3,
+        height: getdim("#thresholdprobability").width *0.5,
         color: "#4e79a7"
     })
     
@@ -54,7 +58,7 @@ function populatepage(region) {
         x : "date",
         y : "forecast",
         width: getdim("#forecastspread").width,
-        height: getdim("#forecastspread").width*0.5,
+        height: getdim("#forecastspread").width*0.35,
         color: "#4e79a7",
         div: "#forecastspread",
         forecastdate: new Date("2022-01-01")
@@ -75,7 +79,7 @@ function populatepage(region) {
         x : "date",
         y : "forecast",
         width: getdim("#forecastanomalies").width,
-        height: getdim("#forecastanomalies").width*0.2,
+        height: getdim("#forecastanomalies").width*0.15,
         color: "#4e79a7",
         div: "#forecastanomalies",
         forecastdate: new Date("2022-01-01")
@@ -100,7 +104,7 @@ $("input[id='inclforecast']").change(e => {
             y : "forecast",
             yLabel: "↑ Total",
             width: getdim("#forecastspread").width,
-            height: getdim("#forecastspread").width*0.5,
+            height: getdim("#forecastspread").width*0.35,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: new Date("2022-01-01"),
@@ -111,7 +115,7 @@ $("input[id='inclforecast']").change(e => {
             x : "date",
             y : "forecast",
             width: getdim("#forecastanomalies").width,
-            height: getdim("#forecastanomalies").width*0.2 ,
+            height: getdim("#forecastanomalies").width*0.15,
             color: "#4e79a7",
             div: "#forecastanomalies",
             forecastdate: new Date("2022-01-01"),
@@ -123,7 +127,7 @@ $("input[id='inclforecast']").change(e => {
             y : "forecast",
             yLabel: "↑ Total",
             width: getdim("#forecastspread").width ,
-            height: getdim("#forecastspread").width*0.5,
+            height: getdim("#forecastspread").width*0.35,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: new Date("2022-01-01"),
@@ -136,7 +140,7 @@ $("input[id='inclforecast']").change(e => {
             // width: getdim("#forecastspread").width - 60,
             // height: getdim("#forecastspread").height*0.25,
             width: getdim("#forecastanomalies").width,
-            height: getdim("#forecastanomalies").width*0.2,
+            height: getdim("#forecastanomalies").width*0.15,
             color: "#4e79a7",
             div: "#forecastanomalies",
             forecastdate: new Date("2022-01-01"),
@@ -184,21 +188,22 @@ $("input[name='threshold']").change(e => {
     })
 })
 
-fetch('./data/lga_totals.json')
+fetch('./data/lga_totals_with_state.json')
     .then(response => response.json())
     .then(data => {
         lga_totals = data
-        lgas = data.map(i => i.LGACode)
+        lgas = data.map(i => i.lga_code)
         console.log(lgas)
         fetch('./data/lga_map.geojson')
             .then(response => response.json())
             .then(data => {
                 data = data.features.map(lga => {
                     if(lgas.includes(lga.properties.LGA_CODE20)) {
-                        lga.properties.total = lga_totals.filter(i => i.LGACode == lga.properties.LGA_CODE20)[0].total
+                        lga.properties.total = lga_totals.filter(i => i.lga_code == lga.properties.LGA_CODE20)[0].total
                     } else {
                         lga.properties.total = NaN
                     }
+                    // lga.properties.state = lga_totals.filter(i => i.lga_code == lga.properties.LGA_CODE20)[0].state
                     return lga
                 })
                 let getColor = v => {
@@ -214,7 +219,9 @@ fetch('./data/lga_totals.json')
 
                 let maxTotal = Math.max(...lga_totals.map(i => i.total))
                 console.log(maxTotal)
-                let map = L.map('map').setView([147.0967,-36.0406 ], 13),
+                let map = L.map('map', {
+                    zoomControl: false
+                })
                 vector = L.geoJson(data, {
                     onEachFeature: (feature, layer) => {
                         let style;
@@ -224,15 +231,14 @@ fetch('./data/lga_totals.json')
                             // $("#map").css('width', '60%')
                             map.fitBounds(e.target.getBounds());
                             populatepage(e.target.feature.properties.LGA_CODE20)
-                            $("#regionselectheader").text(e.target.feature.properties.LGA_NAME20)
-                            $("#regionselectlga").text(e.target.feature.properties.LGA_CODE20)
+                            setHeader(e.target.feature.properties.LGA_NAME20, e.target.feature.properties.LGA_CODE20, e.target.feature.properties.STE_NAME16)
                         }
 
                         let highlightFeature = (e) => {
                             let layer = e.target;
 
                             layer.setStyle({
-                                weight: 3,
+                                weight: 2,
                                 color: '#777',
                                 dashArray: '',
                                 fillOpacity: 0.7
@@ -293,73 +299,93 @@ fetch('./data/lga_totals.json')
                     }
                 }).addTo(map); 
 
-                // let legend = L.control({position: 'bottomleft'});
+                let legend = L.control({position: 'bottomleft'});
 
-                // legend.onAdd = function (map) {
+                legend.onAdd = function (map) {
 
-                //     var div = L.DomUtil.create('div', 'info legend'),
-                //         grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-                //         labels = [];
+                    var div = L.DomUtil.create('div', 'info legend'),
+                        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                        labels = [];
                 
-                //     div.innerHTML +=
-                //         '<i style="background-color:#fff"></i> ' +
-                //         'Data Not Available <br>';
+                    div.innerHTML +=
+                        '<div class="mb-1"><b style="font-size:0.825rem">Count Range</b></div>' +
+                        '<i class="border" style="background-color:#fff"></i> ' +
+                        'Data Not Available <br>';
 
-                //     // loop through our density intervals and generate a label with a colored square for each interval
-                //     for (var i = 0; i < grades.length; i++) {
-                //         div.innerHTML +=
-                //             '<i style="background-color:' + getColor(grades[i] + 1) + '"></i> ' +
-                //             grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+' );
-                //     }
+                    // loop through our density intervals and generate a label with a colored square for each interval
+                    for (var i = 0; i < grades.length; i++) {
+                        div.innerHTML +=
+                            '<i class="border" style="background-color:' + getColor(grades[i] + 1) + '"></i> ' +
+                            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+' );
+                    }
                     
-                //     return div;
-                // };
+                    return div;
+                };
 
-                // legend.addTo(map);
+                legend.addTo(map);
 
-                let myIcon = L.icon({
-                    iconUrl: './img/placemarker.png',
-                    iconSize: [25, 25],
+                // let myIcon = L.icon({
+                //     iconUrl: './img/placemarker.png',
+                //     iconSize: [25, 25],
                     
-                });
-
+                // });
+                let myIcon = title => {
+                    let icon = new L.DivIcon({
+                        className: 'name-text',
+                        html: `<svg overflow="visible" xmlns="http://www.w3.org/2000/svg">
+                                    <text overflow="visible" y="12" >${title}</text>
+                                </svg>`
+                    })
+                    return icon
+                }
+            
                 L.marker([-33.8688, 151.2093], {
-                    icon: myIcon,
-                    riseOnHover: true,
-                    title: "Sydney"
+                    icon: myIcon("Sydney"),
+                    // riseOnHover: true,
+                    // title: myIcon("Sydney")
                 }).addTo(map)
                 L.marker([-27.4705, 153.0260], {
-                    icon: myIcon,
-                    riseOnHover: true,
-                    title: "Brisbane"
+                    icon: myIcon("Brisbane"),
+                    // riseOnHover: true,
+                    // title: myIcon("Brisbane")
                 }).addTo(map)
                 L.marker([-28.0167, 153.4000], {
-                    icon: myIcon,
-                    riseOnHover: true,
-                    title: "Gold Coast"
+                    icon: myIcon("Gold Coast"),
+                    // riseOnHover: true,
+                    // title: myIcon("Gold Coast")
                 }).addTo(map)
                 L.marker([-37.8136, 144.9631], {
-                    icon: myIcon,
-                    riseOnHover: true,
-                    title: "Melbourne"
+                    icon: myIcon("Melbourne"),
+                    // riseOnHover: true,
+                    // title: myIcon("Melbourne")
                 }).addTo(map)
                 L.marker([-16.9203, 145.7710], {
-                    icon: myIcon,
-                    riseOnHover: true,
-                    title: "Cairns"
+                    icon: myIcon("Cairns"),
+                    // riseOnHover: true,
+                    // title: myIcon("Cairns")
                 }).addTo(map)
                 L.marker([-31.9523, 115.8613], {
-                    icon: myIcon,
-                    riseOnHover: true,
-                    title: "Perth"
+                    icon: myIcon("Perth"),
+                    // riseOnHover: true,
+                    // title: myIcon("Perth")
                 }).addTo(map)
                 L.marker([-32.9283, 151.7817], {
-                    icon: myIcon,
-                    riseOnHover: true,
-                    title: "Newcastle"
+                    icon: myIcon("Newcastle"),
+                    // riseOnHover: true,
+                    // title: myIcon("Newcastle")
                 }).addTo(map)
+
+                // .setView([147.0967,-36.0406 ], 13)
             
-                map.fitBounds(vector.getBounds());
+                map.fitBounds(L.latLngBounds([
+                    [-27, 148],
+                    [-34, 154]
+                ]));
+
+                L.control.zoom({
+                    position: 'bottomright'
+                }).addTo(map);
+                console.log(map.getBounds())
                 // vector.bindPopup(function (layer) {
                 //     return layer.feature.properties.description;
                 // }) 
