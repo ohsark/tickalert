@@ -15,7 +15,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     <title>Tick Alert</title>
-
+    <style>
+        input[type="radio"] {
+            display: none
+        }
+    </style>
     </head>
 <body>
  
@@ -27,23 +31,74 @@
             </div>
         </nav> -->
         <div class="row h-100" style="background-color: #9bbff4;">
-            <div class="col-5 h-100 px-0" >
+            <div class="col-6 h-100 px-0" >
                 <div class="d-flex flex-column bg-white px-2 py-3 rounded-lg rounded shadow" style="z-index: 10000; position: absolute;  top: 10px; left : 10px">
                     <div class="mb-0 h4 font-weight-bold align-items-center"><span class="text-danger">Tick </span><span>Alert</span><i class="fa-solid fa-shield-dog ms-2"></i> </div>
                     <!-- <span class="text-secondary h6">Tick Paralysis Forecast</span> -->
-                    <span class="text-secondary h6 mt-1 mb-0">History of Dog Tick Cases in Australia</span>
+                    <span class="text-secondary h6 mt-1 mb-0">History of Dog Paralysis Tick Cases</span>
                 </div>
                 <div id="map"></div>
             </div>
 
-            <div class="col-7 overflow-auto h-100 rounded-left rounded-lg bg-white shadow border">
-                <div class="dropdown">
-                    <button class="btn text-left px-0 btn-outline dropdown-toggle w-100 h-100 mt-3" type="button" id="region-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-align: left;">
-                        <span class="d-inline-flex flex-column"><span class="h4 inline-block m-0" id="regionselectheader"></span><span class="h6 inline-block text-secondary font-weight-bold" id="regionselectlga"></span>, <span class="h6 inline-block text-secondary font-weight-bold" id="regionselectstate"></span>
-                    </button>
-                    <div class="dropdown-menu w-100 overflow-auto" style="height: 300px;" aria-labelledby="region-selector" id="regionselectoptions">
-                        
+            <div class="col-6 overflow-auto h-100 rounded-left rounded-lg bg-white shadow border">
+                <div class="mt-3">
+                    <h4 class="m-0 fw-bold heading">Tick Paralysis cases overtime</h4>
+                    <p class="m-0 para">We used natural language processing to identify historical cases of tick paralysis from veterinary clinical records.</p>
+
+                        <!-- <p class="text-secondary small mb-0">Comparison</p> -->
+
+                    <!-- <div class=" mt-2 mb-1">
+                        <div class="d-flex flex-row align-items-center">
+                            <p class="my-0 mr-2 h6">Add other regions</p>
+                            <label class="switch ml-2">
+                                <input type="checkbox" id="inclforecast" name="comptoggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div> -->
+                    <div class="dropdown d-flex">
+                        <button class="btn py-1 px-2 btn-outline-dark rounded-pill dropdown-toggle mt-3" type="button" id="region-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-align: left;">
+                                <h6 class="m-0 d-inline-block">LGA Regions</h6>
+                        </button>
+                        <div class="dropdown-menu overflow-auto" style="height: 300px" aria-labelledby="region-selector" id="regionselectoptions">
+                            
+                        </div>
                     </div>
+
+                    <div class="btn-group-toggle mt-2 area-btns-checkbox descriptive-btns" id="nonareabuttons" data-toggle="buttons">
+						
+					</div>
+
+                    <div class="btn-group-toggle mt-1 area-btns-checkbox descriptive-btns" id="selectedregions" data-toggle="buttons">
+						
+					</div>
+
+                    <!-- <div class="btn-group-toggle area-btns-radio descriptive-btns" data-toggle="buttons" >
+						<label class="btn active btn-outline-dark no-focus btn-sm rounded-pill px-2 py-1 font-weight-bold mb-2">
+							<input type="radio" name="analysis_type" id="option1" value="one_variable" checked> All Australia
+						</label>
+						<label class="btn btn-outline-dark btn-sm no-focus rounded-pill px-2 py-1 font-weight-bold mb-2">
+							<input type="radio" name="analysis_type" id="option2" value="two_variable"> VIC
+						</label>
+                        <label class="btn btn-outline-dark btn-sm no-focus rounded-pill px-2 py-1 font-weight-bold mb-2">
+							<input type="radio" name="analysis_type" id="option3" value="two_variable"> QLD
+						</label>
+                        <label class="btn btn-outline-dark btn-sm no-focus rounded-pill px-2 py-1 font-weight-bold mb-2">
+							<input type="radio" name="analysis_type" id="option4" value="two_variable"> NSW
+						</label>
+					</div> -->
+
+                
+                    <div id="tickcasescontainer">
+                        <h6 class="mt-3 text-white rounded-lg bg-secondary px-2 py-1">Observed</h6>
+                        <div id="tickcasesobs"></div>
+                        <h6 class="mt-3 text-white rounded-lg bg-secondary px-2 py-1">Trend</h6>
+                        <div id="tickcasestrend"></div>
+                        <h6 class="mt-3 text-white rounded-lg bg-secondary px-2 py-1">Cumulative</h6>
+                        <div id="tickcasescum"></div>
+
+                    </div>
+                    
                 </div>
 
         </div>
@@ -56,26 +111,14 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="./scripts/script.js"></script>
     <script src="./scripts/graphs.js"></script>
-    <script src="./scripts/forecast.js"></script>
+    <script src="./scripts/hist.js"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script> 
         
     
     <script>
-        let lgadata = []
-        let regiondata
-
-        fetch("./data/predictions_updated_27series.json")
-            .then(response => response.json())
-            .then(data => {
-            
-            regiondata = data
-            selectedLGA = regiondata[0].lga
-            data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-center h5' data-lga='" + v.lga + "' href='#''>" + v.region + " - " + v.lga  +"</a>"))
-            populatepage("31000")
-        })
-
+       tickcases("overall")
     </script>
   </body>
 </html>

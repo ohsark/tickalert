@@ -85,191 +85,6 @@ function percentageworse(data, {
 	return svg.node();
 }
 
-function linechart(data, {
-    x = ([x]) => x, // given d in data, returns the (temporal) x-value
-    y = ([, y]) => y, // given d in data, returns the (quantitative) y-value
-    z = () => 1, // given d in data, returns the (categorical) z-value
-    title, // given d in data, returns the title text
-    defined, // for gaps in data
-    curve = d3.curveLinear, // method of interpolation between points
-    marginTop = 20, // top margin, in pixels
-    marginRight = 30, // right margin, in pixels
-    marginBottom = 30, // bottom margin, in pixels
-    marginLeft = 40, // left margin, in pixels
-    width, // outer width, in pixels
-    height, // outer height, in pixels
-    xType = d3.scaleUtc, // type of x-scale
-    xDomain, // [xmin, xmax]
-    xRange = [marginLeft, width - marginRight], // [left, right]
-    yType = d3.scaleLinear, // type of y-scale
-    yDomain, // [ymin, ymax]
-    yRange = [height - marginBottom, marginTop], // [bottom, top]
-    yFormat, // a format specifier string for the y-axis
-    yLabel, // a label for the y-axis
-    xLabel, // a label for the x-axis
-    zDomain, // array of z-values
-    color = "currentColor", // stroke color of line, as a constant or a function of *z*
-    strokeLinecap, // stroke line cap of line
-    strokeLinejoin, // stroke line join of line
-    strokeWidth = 2.5, // stroke width of line
-    strokeOpacity, // stroke opacity of line
-    mixBlendMode = "multiply", // blend mode of lines
-    div,
-	tickFormat
-  } = {}) {
-    // Compute values.
-    const X = d3.map(data, x);
-    const Y = d3.map(data, y);
-    const Z = d3.map(data, z);
-    const O = d3.map(data, d => d);
-    if (defined === undefined) defined = (d, i) => !isNaN(Y[i]);
-    const D = d3.map(data, defined);
-    d3.select(div).select("svg").remove()
-	console.log(d3.map(data, x))
-    // Compute default domains, and unique the z-domain.
-    if (xDomain === undefined) xDomain = d3.extent(X);
-    if (yDomain === undefined) yDomain = [0, d3.max(Y, d => typeof d === "string" ? +d : d)];
-    if (zDomain === undefined) zDomain = Z;
-    zDomain = new d3.InternSet(zDomain);
-  
-    // console.log(X, Y, Z)
-    // console.log(xDomain, yDomain, zDomain)
-    // Omit any data not present in the z-domain.
-    const I = d3.range(X.length).filter(i => zDomain.has(Z[i]));
-    console.log(div)
-    // Construct scales and axes.
-    const xScale = xType(xDomain, xRange);
-    const yScale = yType(yDomain, yRange);
-    const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0).tickFormat(tickFormat);
-    const yAxis = div == "#trend" || div == "#seasonal" ? d3.axisLeft(yScale) : d3.axisLeft(yScale).ticks(height / 60, yFormat);
-    
-  
-    // Construct a line generator.
-    const line = d3.line()
-        .defined(i => D[i])
-        .curve(curve)
-        .x(i => xScale(X[i]))
-        .y(i => yScale(Y[i]));
-  
-    const svg = d3.select(div)
-      .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [0, 0, width, height])
-        .attr("style", "max-width: 100%; height: auto; height: intrinsic; overflow: visible")
-        .style("-webkit-tap-highlight-color", "transparent")
-        .on("pointerenter", pointerentered)
-        .on("pointermove", pointermoved)
-        .on("pointerleave", pointerleft)
-        .on("touchstart", event => event.preventDefault());
-  
-    svg.append("g")
-        .attr("transform", `translate(0,${height - marginBottom})`)
-        .call(xAxis)
-        .call(g => g.append("text")
-            .attr("x", width - marginRight - 10)
-            .attr("y",25)
-            .attr("font-size", "1.25em")
-            .attr("font-weight", "600")
-            .attr("fill", "currentColor")
-            // .attr("text-anchor", "start")
-            .text(xLabel));
-        
-  
-
-    svg.append("g")
-        .attr("transform", `translate(${marginLeft},0)`)
-        .call(yAxis)
-        .call(g => g.select(".domain").remove())
-        .call(g => g.append("text")
-            .attr("x", 0)
-            .attr("y",12)
-            .attr("font-size", "1.25em")
-            .attr("font-weight", "600")
-            .attr("fill", "currentColor")
-            // .attr("text-anchor", "start")
-            .text(yLabel));
-    
-    const path = svg.append("g")
-        .attr("fill", "none")
-        .attr("stroke", typeof color === "string" ? color : null)
-        .attr("stroke-linecap", strokeLinecap)
-        .attr("stroke-linejoin", strokeLinejoin)
-        .attr("stroke-width", strokeWidth)
-        .attr("stroke-opacity", strokeOpacity)
-      .selectAll("path")
-      .data(d3.group(I, i => Z[i]))
-      .join("path")
-        .style("mix-blend-mode", mixBlendMode)
-        .attr("stroke", typeof color === "function" ? ([z]) => color(z) : null)
-        .attr("d", ([, I]) => line(I));
-  
-    const dot = svg.append("g")
-        .attr("class", "focus")
-        .attr("display", "none");
-  
-    dot.append("circle")
-        .attr("r", 5);
-
-    dot.append("rect")
-        .attr("class", "tooltip-line")
-        .attr("width", 100)
-        .attr("height", Z[1] == undefined ? 50 : 70)
-        .attr("x", -50)
-        .attr("y", Z[1] == undefined ? -70 : -90)
-        .attr("rx", 4)
-        .attr("ry", 4)
-		.attr("fill", "#fff")
-		.attr("stroke", "#333");
-  
-    dot.append("text")
-        .attr("class", "tooltip-date")
-        .attr("x", -45)
-        .attr("y", -50);
-	
-	dot.append("text")
-        .attr("class", "tooltip-strata")
-        .attr("x", -45)
-        .attr("y", -70)
-		.attr("font-weight", "bold");
-  
-    dot.append("text")
-        .attr("x", -45)
-        .attr("y", -30)
-        .text("Total:");
-  
-    dot.append("text")
-        .attr("class", "tooltip-count")
-        .attr("x", 0)
-        .attr("y", -30)
-		.attr("font-weight", "bold");
-  
-    function pointermoved(event) {
-      const [xm, ym] = d3.pointer(event);
-      const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(Y[i]) - ym)); // closest point
-      path.style("stroke", ([z]) => Z[i] === z ? null : "#ddd").filter(([z]) => Z[i] === z).raise();
-      dot.attr("transform", `translate(${xScale(X[i])},${yScale(Y[i])})`);
-      dot.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
-	  dot.select(".tooltip-strata").text(Z[i]);
-      dot.select(".tooltip-count").text(Y[i]);
-      svg.property("value", O[i]).dispatch("input", {bubbles: true});
-    }
-  
-    function pointerentered() {
-      path.style("mix-blend-mode", null).style("stroke", "#ddd");
-      dot.attr("display", null);
-    }
-  
-    function pointerleft() {
-      path.style("mix-blend-mode", "multiply").style("stroke", null);
-      dot.attr("display", "none");
-      svg.node().value = null;
-      svg.dispatch("input", {bubbles: true});
-    }
-    
-    return Object.assign(svg.node(), {value: null});
-}
-
 function anomalieschart(data, {
     x = ([x]) => x, // given d in data, returns the (temporal) x-value
     y = ([, y]) => y, // given d in data, returns the (quantitative) y-value
@@ -1198,4 +1013,425 @@ function forecasttrend(data, {
 			.style("border", "5px solid #fff");
   
     return svg.node();
+}
+
+function linechart(data, {
+  x = ([x]) => x, // given d in data, returns the (temporal) x-value
+  y = ([, y]) => y, // given d in data, returns the (quantitative) y-value
+  z = () => 1, // given d in data, returns the (categorical) z-value
+  title, // given d in data, returns the title text
+  defined, // for gaps in data
+  curve = d3.curveLinear, // method of interpolation between points
+  marginTop = 20, // top margin, in pixels
+  marginRight = 30, // right margin, in pixels
+  marginBottom = 30, // bottom margin, in pixels
+  marginLeft = 40, // left margin, in pixels
+  width, // outer width, in pixels
+  height, // outer height, in pixels
+  xType = d3.scaleUtc, // type of x-scale
+  xDomain, // [xmin, xmax]
+  xRange = [marginLeft, width - marginRight], // [left, right]
+  yType = d3.scaleLinear, // type of y-scale
+  yDomain, // [ymin, ymax]
+  yRange = [height - marginBottom, marginTop], // [bottom, top]
+  yFormat, // a format specifier string for the y-axis
+  yLabel, // a label for the y-axis
+  xLabel, // a label for the x-axis
+  zDomain, // array of z-values
+  color = "currentColor", // stroke color of line, as a constant or a function of *z*
+  strokeLinecap, // stroke line cap of line
+  strokeLinejoin, // stroke line join of line
+  strokeWidth = 2.5, // stroke width of line
+  strokeOpacity, // stroke opacity of line
+  mixBlendMode = "multiply", // blend mode of lines
+  div,
+  tickFormat
+} = {}) {
+  // Compute values.
+  const X = d3.map(data, x);
+  const Y = d3.map(data, y);
+  const Z = d3.map(data, z);
+  const O = d3.map(data, d => d);
+  if (defined === undefined) defined = (d, i) => !isNaN(Y[i]);
+  const D = d3.map(data, defined);
+  d3.select(div).select("svg").remove()
+console.log(d3.map(data, x))
+  // Compute default domains, and unique the z-domain.
+  if (xDomain === undefined) xDomain = d3.extent(X);
+  if (yDomain === undefined) yDomain = [0, d3.max(Y, d => typeof d === "string" ? +d : d)];
+  if (zDomain === undefined) zDomain = Z;
+  zDomain = new d3.InternSet(zDomain);
+
+  // console.log(X, Y, Z)
+  // console.log(xDomain, yDomain, zDomain)
+  // Omit any data not present in the z-domain.
+  const I = d3.range(X.length).filter(i => zDomain.has(Z[i]));
+  console.log(div)
+  // Construct scales and axes.
+  const xScale = xType(xDomain, xRange);
+  const yScale = yType(yDomain, yRange);
+  const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0).tickFormat(tickFormat);
+  const yAxis = div == "#trend" || div == "#seasonal" ? d3.axisLeft(yScale) : d3.axisLeft(yScale).ticks(height / 60, yFormat);
+  
+
+  // Construct a line generator.
+  const line = d3.line()
+      .defined(i => D[i])
+      .curve(curve)
+      .x(i => xScale(X[i]))
+      .y(i => yScale(Y[i]));
+
+  const svg = d3.select(div)
+    .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height])
+      .attr("style", "max-width: 100%; height: auto; height: intrinsic; overflow: visible")
+      .style("-webkit-tap-highlight-color", "transparent")
+      .on("pointerenter", pointerentered)
+      .on("pointermove", pointermoved)
+      .on("pointerleave", pointerleft)
+      .on("touchstart", event => event.preventDefault());
+
+  svg.append("g")
+      .attr("transform", `translate(0,${height - marginBottom})`)
+      .call(xAxis)
+      .call(g => g.append("text")
+          .attr("x", width - marginRight - 10)
+          .attr("y",35)
+          .attr("font-size", "1.25em")
+          .attr("font-weight", "600")
+          .attr("fill", "currentColor")
+          // .attr("text-anchor", "start")
+          .text(xLabel));
+      
+
+
+  svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(yAxis)
+      .call(g => g.select(".domain").remove())
+      .call(g => g.append("text")
+          .attr("x", 0)
+          .attr("y",12)
+          .attr("font-size", "1.25em")
+          .attr("font-weight", "600")
+          .attr("fill", "currentColor")
+          // .attr("text-anchor", "start")
+          .text(yLabel));
+  
+  const path = svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke", typeof color === "string" ? color : null)
+      .attr("stroke-linecap", strokeLinecap)
+      .attr("stroke-linejoin", strokeLinejoin)
+      .attr("stroke-width", strokeWidth)
+      .attr("stroke-opacity", strokeOpacity)
+    .selectAll("path")
+    .data(d3.group(I, i => Z[i]))
+    .join("path")
+      .style("mix-blend-mode", mixBlendMode)
+      .attr("stroke", typeof color === "function" ? ([z]) => color(z) : null)
+      .attr("d", ([, I]) => line(I));
+
+  const dot = svg.append("g")
+      .attr("class", "focus")
+      .attr("display", "none");
+
+  dot.append("circle")
+      .attr("r", 5);
+
+  dot.append("rect")
+      .attr("class", "tooltip-line")
+      .attr("width", 100)
+      .attr("height", Z[1] == undefined ? 50 : 70)
+      .attr("x", -50)
+      .attr("y", Z[1] == undefined ? -70 : -90)
+      .attr("rx", 4)
+      .attr("ry", 4)
+  .attr("fill", "#fff")
+  .attr("stroke", "#333");
+
+  dot.append("text")
+      .attr("class", "tooltip-date")
+      .attr("x", -45)
+      .attr("y", -50);
+
+dot.append("text")
+      .attr("class", "tooltip-strata")
+      .attr("x", -45)
+      .attr("y", -70)
+  .attr("font-weight", "bold");
+
+  dot.append("text")
+      .attr("x", -45)
+      .attr("y", -30)
+      .text("Total:");
+
+  dot.append("text")
+      .attr("class", "tooltip-count")
+      .attr("x", 0)
+      .attr("y", -30)
+  .attr("font-weight", "bold");
+
+  function pointermoved(event) {
+    const [xm, ym] = d3.pointer(event);
+    const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(Y[i]) - ym)); // closest point
+    path.style("stroke", ([z]) => Z[i] === z ? null : "#ddd").filter(([z]) => Z[i] === z).raise();
+    dot.attr("transform", `translate(${xScale(X[i])},${yScale(Y[i])})`);
+    dot.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
+  dot.select(".tooltip-strata").text(Z[i]);
+    dot.select(".tooltip-count").text(Y[i]);
+    svg.property("value", O[i]).dispatch("input", {bubbles: true});
+  }
+
+  function pointerentered() {
+    path.style("mix-blend-mode", null).style("stroke", "#ddd");
+    dot.attr("display", null);
+  }
+
+  function pointerleft() {
+    path.style("mix-blend-mode", "multiply").style("stroke", null);
+    dot.attr("display", "none");
+    svg.node().value = null;
+    svg.dispatch("input", {bubbles: true});
+  }
+  
+  return Object.assign(svg.node(), {value: null});
+}
+
+function MultiLineChart(data, {
+  x = ([x]) => x, // given d in data, returns the (temporal) x-value
+  y = ([, y]) => y, // given d in data, returns the (quantitative) y-value
+  z = () => 1, // given d in data, returns the (categorical) z-value
+  title, // given d in data, returns the title text
+  defined, // for gaps in data
+  curve = d3.curveLinear, // method of interpolation between points
+  marginTop = 20, // top margin, in pixels
+  marginRight = 30, // right margin, in pixels
+  marginBottom = 30, // bottom margin, in pixels
+  marginLeft = 40, // left margin, in pixels
+  width, // outer width, in pixels
+  height, // outer height, in pixels
+  xType = d3.scaleUtc, // type of x-scale
+  xDomain, // [xmin, xmax]
+  xRange = [marginLeft, width - marginRight], // [left, right]
+  yType = d3.scaleLinear, // type of y-scale
+  yDomain, // [ymin, ymax]
+  yRange = [height - marginBottom, marginTop], // [bottom, top]
+  yFormat, // a format specifier string for the y-axis
+  yLabel, // a label for the y-axis
+  xLabel, // a label for the x-axis
+  zDomain, // array of z-values
+  color = "currentColor", // stroke color of line, as a constant or a function of *z*
+  strokeLinecap, // stroke line cap of line
+  strokeLinejoin, // stroke line join of line
+  strokeWidth = 2.5, // stroke width of line
+  strokeOpacity, // stroke opacity of line
+  mixBlendMode = "multiply", // blend mode of lines
+  colors = d3.schemeTableau10,
+  div,
+  voronoi // show a Voronoi overlay? (for debugging)
+} = {}) {
+  // Compute values.
+  const X = d3.map(data, x);
+  const Y = d3.map(data, y);
+  const Z = d3.map(data, z);
+  const O = d3.map(data, d => d);
+  if (defined === undefined) defined = (d, i) => !isNaN(Y[i]);
+  const D = d3.map(data, defined);
+
+  // Compute default domains, and unique the z-domain.
+  if (yDomain === undefined) yDomain = [0, d3.max(Y, d => typeof d === "string" ? +d : d)];
+  if (xDomain === undefined) xDomain = d3.extent(X);
+  if (zDomain === undefined) zDomain = Z;
+  zDomain = new d3.InternSet(zDomain);
+
+  // Omit any data not present in the z-domain.
+  const I = d3.range(X.length).filter(i => zDomain.has(Z[i]));
+
+  // Construct scales and axes.
+  const xScale = xType(xDomain, xRange);
+  const yScale = yType(yDomain, yRange);
+  const zScale = d3.scaleOrdinal(zDomain, colors);
+  const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
+  const yAxis = d3.axisLeft(yScale).ticks(height / 60, yFormat);
+
+  // Compute titles.
+  const T = title === undefined ? Y : title === null ? null : d3.map(data, title);
+
+
+
+  // Construct a line generator.
+  const line = (I, axis) => d3.line()
+      .defined(i => D[i])
+      .curve(curve)
+      .x(i => axis(X[i]))
+      .y(i => yScale(Y[i]))(I);
+
+  d3.select(div).select("svg").remove()
+
+  const svg = d3.select(div)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height])
+      .attr("style", "max-width: 100%; height: auto; height: intrinsic;overflow: visible")
+      .style("-webkit-tap-highlight-color", "transparent")
+      .on("pointerenter", pointerentered)
+      .on("pointermove", pointermoved)
+      .on("pointerleave", pointerleft)
+      .on("touchstart", event => event.preventDefault());
+
+  const legend = svg.append('g')
+        .attr('font-family', 'sans-serif')
+
+  // create one g for each entry in the color scale
+  const cell = legend.selectAll('g')
+  .data(zScale.domain())
+  .join('g');
+
+  const squareSize = 15;
+
+  // add the colored square for each entry
+  cell.append('rect')
+      .attr('fill', d => zScale(d))
+      .attr('width', squareSize)
+      .attr('height', squareSize)
+
+  // add the text label for each entry
+  cell.append('text')
+      .attr('dominant-baseline', 'middle')
+      .attr('x', squareSize * 1.5)
+      .attr('y', squareSize / 2 + 2)
+      .text(d => d);
+
+  // position the cells
+  let xPosition = 0;
+
+  cell.each(function(d, i) {
+      d3.select(this)
+          .attr('transform', `translate(${xPosition})`);
+      
+      xPosition += (this.getBBox().width + squareSize);
+  });
+    
+  legend.attr('transform', (d, i) => `translate(${width - xPosition},0)`)
+
+  let xaci = svg.append("g")
+      .attr("transform", `translate(0,${height - marginBottom})`)
+      .attr("class", "axis-x")
+      .call(xAxis)
+      .call(g => g.append("text")
+          .attr("x", width - marginRight)
+          .attr("y", 27)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "end")
+          .text(xLabel));;
+
+  svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(yAxis)
+      .call(g => g.select(".domain").remove())
+      .call(g => g.append("text")
+          .attr("x", -marginLeft)
+          .attr("y", 10)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .text(yLabel));
+
+  const path = svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke", typeof color === "string" ? color : null)
+      .attr("stroke-linecap", strokeLinecap)
+      .attr("stroke-linejoin", strokeLinejoin)
+      .attr("stroke-width", strokeWidth)
+      .attr("stroke-opacity", strokeOpacity)
+      .selectAll("path")
+      .data(d3.group(I, i => Z[i]))
+      .join("path")
+      .style("mix-blend-mode", mixBlendMode)
+      .attr("stroke", ([i,]) => zScale(i))
+      .attr("d", ([, I]) => line(I, xScale));
+
+      const dot = svg.append("g")
+      .attr("class", "focus")
+      .attr("display", "none");
+
+      dot.append("circle")
+          .attr("r", 5);
+
+      dot.append("rect")
+          .attr("class", "tooltip-line")
+          .attr("width", 100)
+          .attr("height", Z[1] == undefined ? 50 : 70)
+          .attr("x", -50)
+          .attr("y", Z[1] == undefined ? -70 : -90)
+          .attr("rx", 4)
+          .attr("ry", 4)
+      .attr("fill", "#fff")
+      .attr("stroke", "#333");
+
+      dot.append("text")
+          .attr("class", "tooltip-date")
+          .attr("x", -45)
+          .attr("y", -50);
+
+    dot.append("text")
+          .attr("class", "tooltip-strata")
+          .attr("x", -45)
+          .attr("y", -70)
+      .attr("font-weight", "bold");
+
+    dot.append("text")
+        .attr("x", -45)
+        .attr("y", -30)
+        .text("Total:");
+
+    dot.append("text")
+        .attr("class", "tooltip-count")
+        .attr("x", 0)
+        .attr("y", -30)
+    .attr("font-weight", "bold");
+
+    function pointermoved(event) {
+      const [xm, ym] = d3.pointer(event);
+      const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(Y[i]) - ym)); // closest point
+      path.style("stroke", ([z]) => Z[i] === z ? null : "#ddd").filter(([z]) => Z[i] === z).raise();
+      dot.attr("transform", `translate(${xScale(X[i])},${yScale(Y[i])})`);
+      dot.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
+    dot.select(".tooltip-strata").text(Z[i]);
+      dot.select(".tooltip-count").text(Y[i]);
+      svg.property("value", O[i]).dispatch("input", {bubbles: true});
+    }
+
+    function pointerentered() {
+      path.style("mix-blend-mode", null).style("stroke", "#ddd");
+      dot.attr("display", null);
+    }
+
+    function pointerleft() {
+      path.style("mix-blend-mode", "multiply").style("stroke", null);
+      dot.attr("display", "none");
+      svg.node().value = null;
+      svg.dispatch("input", {bubbles: true});
+    }
+
+    // const handleZoom = (e) => {
+    //   // d3.select("#kmc").selectAll("svg").attr("transform", e.transform)
+    //   // xaxe.call(xAxis.scale(d3.event.transform.rescaleX(x)))
+    //   // xaxe.call(xAxis, xz)
+    //   xaci.call(xAxis.scale(e.transform.rescaleX(xScale)));
+    //   path.attr("d", line(I, e.transform.rescaleX(xScale)))
+    // };
+
+    // const zoom = d3.zoom()
+    //     .scaleExtent([1, 32])
+    //     .extent([[marginLeft, 0], [width - marginRight, height]])
+    //     .translateExtent([[marginLeft, -Infinity], [width - marginRight, Infinity]])
+    //     .on('zoom', handleZoom);
+
+    // d3.select(div).selectAll("svg").call(zoom)
+    
+    return Object.assign(svg.node(), { value: null });
 }

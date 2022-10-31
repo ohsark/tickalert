@@ -50,7 +50,7 @@ function populatepage(region) {
         // width: getdim("#thresholdcont").width,
         // height: getdim("#thresholdcont").height - 90,
         width: getdim("#thresholdprobability").width,
-        height: getdim("#thresholdprobability").width *0.5,
+        height: getdim("#thresholdprobability").width *0.3,
         color: "#4e79a7"
     })
     

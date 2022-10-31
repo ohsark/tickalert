@@ -1,287 +1,429 @@
+let SELECTED_AREAS = []
 
-// function map(totals) {
+//////// Event Handlers for Tick cases
+// $("input[name='tickcasecomp']").change(e => {
+//     tickcasecomp = $(e.target).attr('id')
+//     tickcases(tickcasecomp)
+// })
 
-//     let lgas = totals.map(l => l.LGACode)
+// $("input[name='tickcasecomp']").change(e => {
+//     tickcasecomp = $(e.target).attr('id')
+//     tickcases(tickcasecomp)
+// })
+
+$("#selectedregions").on("click", "label", e  => {
+    _updateSelection({
+        "areaname": e.target.getAttribute("data-areaname"),
+        "area": e.target.getAttribute("data-area")
+    })
+})
+
+$("#regionselectoptions").on("click", "h6", e  => {
+    _updateSelection({
+        "areaname": e.target.getAttribute("data-areaname"),
+        "area": e.target.getAttribute("data-area")
+    })
+})
+
+$("#nonareabuttons").on("change", "input[name='mainareachange']", e => {
+    _updateSelection({
+        "areaname": e.target.getAttribute("data-areaname"),
+        "area": e.target.getAttribute("data-area")
+    })
+})
+
+function _updateSelection(region) {
+    if(!SELECTED_AREAS.some(r => r.area == region.area)) {
+        SELECTED_AREAS.push(region)
+    } else {
+        SELECTED_AREAS = SELECTED_AREAS.filter(r => r.area != region.area)
+    }
+    console.log(SELECTED_AREAS)
+    _refreshStrats()
+    _updateCharts()
+}
+
+function _updateCharts() {
+
+    let dim = getdim("#tickcasescontainer")
+
+    fetch("./data/areasummaries.json")
+        .then(response => response.json())
+        .then(data => {
+            let tsobs = [],
+                tstrend = [], 
+                tscum = []
+            
+            data
+                .filter(a => SELECTED_AREAS.some(r => a.area == r.area))
+                .forEach(d => {
+                    tsobs.unshift(...d.tsobs.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
+                    tstrend.unshift(...d.tstrend.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
+                    tscum.unshift(...d.tscum.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
+                })
+
+            console.log(tsobs)
+            
+            MultiLineChart(tsobs, {
+                x: d => new Date(d.date),
+                y: d => d.n,
+                z: d => d.strat,
+                height: dim.width *0.5, 
+                width: dim.width ,
+                color: "#4e79a7",
+                div: "#tickcasesobs",
+                xLabel: "Date →",
+                yLabel: "↑ Total",
+            })
     
-//     fetch('./data/aus_lga_map.geojson')
-//     .then(response => response.json())
-//     .then(data => {
-//         let map = L.map('map', {zoomControl: false}).setView([151.2093,-33.8688],zoom = 25),
-//         vector = L.geoJson(data, {
-//             onEachFeature: (feature, layer) => {
-//                 layer.on("click", (e, d) => {
-//                     console.log(e.target.feature.properties)
-//                 })
-//                 layer.on("mouseover", (e, d) => {
-//                     layer.setStyle({
-//                         fillColor: "#EC5858"
-//                     })
-//                 })
-//                 layer.on("mouseout", (e, d) => {
-//                     layer.setStyle({
-//                         fillColor: "#DCBCBC"
-//                     })
-//                 })
-//             },
-//             style: {
-//                 color: "#EC5858",
-//                 weight: 1,
-//                 fillColor: "#DCBCBC",
-//                 fillOpacity: 1
-//             }
-//         }).addTo(map); 
-//         map.fitBounds(vector.getBounds());
-//         // vector.bindPopup(function (layer) {
-//         //     return layer.feature.properties.description;
-//         // }) 
-//     })
-//     .catch(error => console.log(error));
-// }
+            MultiLineChart(tstrend, {
+                x: d => new Date(d.date),
+                y: d => d.n,
+                z: d => d.strat,
+                height: dim.width *0.5, 
+                width: dim.width ,
+                color: "#4e79a7",
+                div: "#tickcasestrend",
+                xLabel: "Date →",
+                yLabel: "↑ Total",
+            })
+    
+            MultiLineChart(tscum, {
+                x: d => new Date(d.date),
+                y: d => d.n,
+                z: d => d.strat,
+                height: dim.width *0.5, 
+                width: dim.width ,
+                color: "#4e79a7",
+                div: "#tickcasescum",
+                xLabel: "Date →",
+                yLabel: "↑ Total",
+            })
+        })
 
-function affectedAreas() {
-    fetch("./data/region_totals.json")
+        
+}
+
+function initialize_areafilters(areas) {
+    areas.forEach(r => {
+        if(r.areatype == "LGA") {
+            $("#regionselectoptions").append(`
+                <h6 class="px-2 dropdown-item" style="cursor:pointer" data-area="${r.area}" data-areaname="${r.areaname}"> ${r.areaname + ", " + r.areastate + ", " + r.area}</h6>
+            `)
+        } else {
+            // $("#nonareabuttons").append(`
+            //     <label class="btn active btn-outline-dark no-focus btn-sm rounded-pill px-2 py-1 font-weight-bold mb-2">
+            //         <input type="checkbox" name="mainareachange" data-areaname="NonLGA" data-area="${r.area}"> ${r.area}
+            //     </label>
+            // `)
+            $("#nonareabuttons").append(`
+                <label class="btn active btn-outline-dark no-focus btn-sm rounded-pill px-2 py-1 font-weight-bold mb-2">
+                    <input type="checkbox" name="mainareachange" data-areaname="NonLGA" data-area="${r.area}" ${r.area == "All Australia" ? "checked" : ""}> ${r.area}
+                </label>
+            `)
+            if(r.area == "All Australia") {
+                _updateSelection({
+                    "areaname": "NonLGA",
+                    "area": r.area
+                })
+            }
+        }
+        // _updateCharts()
+    })
+}
+
+function _refreshStrats() {
+    $("#selectedregions").empty()
+    SELECTED_AREAS.forEach(r => {
+        if(r.areaname != "NonLGA") {
+            $("#selectedregions").append(`
+                <label 
+                    class="selectedregion btn active btn-outline-dark no-focus btn-sm rounded-pill px-2 py-1 font-weight-bold mb-2"
+                    data-area="${r.area}"
+                    data-areaname="${r.areaname}">
+                        ${r.areaname}
+                </label>
+            `)
+        }
+    })
+}
+
+fetch('./data/areasummaries.json')
+    .then(response => response.json())
+    .then(data => {
+        lga_totals = data
+        lgas = data.map(i => i.area)
+        initialize_areafilters(data.map(i => {
+            return {
+                area: i.area,
+                areatype: i.areaytype,
+                areaname: i.areaname,
+                areastate: i.areastate,
+            }
+        }))
+        fetch('./data/lga_map.geojson')
             .then(response => response.json())
             .then(data => {
-                const areas = data.sort((a, b) => b.total - a.total).slice(0,5)
-                areas.forEach((record, i) => {
-                    let width = i == 0 ? 100 : (areas[i].total / areas[0].total * 100)
-                    console.log(width, i)
-                    // $("#topAffected").append("<div>")
-                    $("#topAffected").append("<div><span class'fw-bold text-muted'>"+ record.Region + "</span><div class='meter d-flex text-white justify-content-end px-1 rounded' style=width:" + width + "%;" + "><b>" + record.total + "</b></div></div>")
-                    // $("#topAffected").append("</div>")
-                });
+                data = data.features.map(lga => {
+                    if(lgas.includes(lga.properties.LGA_CODE20)) {
+                        lga.properties.total = lga_totals.filter(i => i.area == lga.properties.LGA_CODE20)[0].total
+                    } else {
+                        lga.properties.total = NaN
+                    }
+                    // lga.properties.state = lga_totals.filter(i => i.lga_code == lga.properties.LGA_CODE20)[0].state
+                    return lga
+                })
+                let getColor = v => {
+                    return  v > 1000 ? '#800026' :
+                            v > 500  ? '#BD0026' :
+                            v > 200  ? '#E31A1C' :
+                            v > 100  ? '#FC4E2A' :
+                            v > 50   ? '#FD8D3C' :
+                            v > 20   ? '#FEB24C' :
+                            v > 10   ? '#FED976' :
+                                        '#FFEDA0';
+                }
+
+                let maxTotal = Math.max(...lga_totals.map(i => i.total))
+                console.log(maxTotal)
+                let map = L.map('map', {
+                    zoomControl: false
+                })
+                vector = L.geoJson(data, {
+                    onEachFeature: (feature, layer) => {
+                        let style;
+
+                        
+                        let zoomToFeature = (e) => {
+                            map.fitBounds(e.target.getBounds());
+                            _updateSelection({
+                                "area": e.target.feature.properties.LGA_CODE20, 
+                                "areaname": e.target.feature.properties.LGA_NAME20
+                            })
+                        }
+
+                        let highlightFeature = (e) => {
+                            let layer = e.target;
+
+                            layer.setStyle({
+                                weight: 2,
+                                color: '#777',
+                                dashArray: '',
+                                fillOpacity: 0.7
+                            });
+                            
+                            layer.bindTooltip("<div><b>" + feature.properties.LGA_NAME20 + "</b><div>Total:<b>" + feature.properties.total + "</b></div></div>").openTooltip()
+
+                            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                                layer.bringToFront();
+                            }
+
+                        }
+
+                        let resetHighlight = (e) => {
+                            let layer = e.target;
+                            layer.closeTooltip()
+                            layer.setStyle({
+                                fillColor: feature.properties.total ? getColor(feature.properties.total) : "#fff",
+                                color: "#ccc",
+                                weight: 1,
+                                fillOpacity: 1
+                            });
+                            // data.resetStyle(layer)
+                                
+                        }         
+
+                        if(feature.properties.total)  {
+                            style = {
+                                // fillColor: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")",
+                                // color: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")"
+                                fillColor: getColor(feature.properties.total),
+                                // color: getColor(feature.properties.total),
+                                weight: 1
+                            }
+                        } else {
+                            style = {
+                                fillColor: "#fff",
+                                color: "#ccc",
+                                // dashArray: "5",                                   
+                            }
+                        }
+                        layer.setStyle(style)
+                        layer.on({
+                            mouseover: highlightFeature,
+                            mouseout: resetHighlight,
+                            click: zoomToFeature
+                        });
+
+                        
+                    },
+                    style: {
+                        // color: "#EC5858",
+                        color: "#ccc",
+                        weight: 1,
+                        // fillColor: "#fff",
+                        fillColor: "#fff",
+                        fillOpacity: 1
+                    }
+                }).addTo(map); 
+
+                let legend = L.control({position: 'bottomleft'});
+
+                legend.onAdd = function (map) {
+
+                    var div = L.DomUtil.create('div', 'info legend'),
+                        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                        labels = [];
+                
+                    div.innerHTML +=
+                        '<div class="mb-1"><b style="font-size:0.825rem">Count Range</b></div>' +
+                        '<i class="border" style="background-color:#fff"></i> ' +
+                        'Data Not Available <br>';
+
+                    // loop through our density intervals and generate a label with a colored square for each interval
+                    for (var i = 0; i < grades.length; i++) {
+                        div.innerHTML +=
+                            '<i class="border" style="background-color:' + getColor(grades[i] + 1) + '"></i> ' +
+                            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+' );
+                    }
+                    
+                    return div;
+                };
+
+                legend.addTo(map);
+
+                // let myIcon = L.icon({
+                //     iconUrl: './img/placemarker.png',
+                //     iconSize: [25, 25],
+                    
+                // });
+                let myIcon = title => {
+                    let icon = new L.DivIcon({
+                        className: 'name-text',
+                        html: `<svg overflow="visible" xmlns="http://www.w3.org/2000/svg">
+                                    <text overflow="visible" y="12" >${title}</text>
+                                </svg>`
+                    })
+                    return icon
+                }
+            
+                L.marker([-33.8688, 151.2093], {
+                    icon: myIcon("Sydney"),
+                    // riseOnHover: true,
+                    // title: myIcon("Sydney")
+                }).addTo(map)
+                L.marker([-27.4705, 153.0260], {
+                    icon: myIcon("Brisbane"),
+                    // riseOnHover: true,
+                    // title: myIcon("Brisbane")
+                }).addTo(map)
+                L.marker([-28.0167, 153.4000], {
+                    icon: myIcon("Gold Coast"),
+                    // riseOnHover: true,
+                    // title: myIcon("Gold Coast")
+                }).addTo(map)
+                L.marker([-37.8136, 144.9631], {
+                    icon: myIcon("Melbourne"),
+                    // riseOnHover: true,
+                    // title: myIcon("Melbourne")
+                }).addTo(map)
+                L.marker([-16.9203, 145.7710], {
+                    icon: myIcon("Cairns"),
+                    // riseOnHover: true,
+                    // title: myIcon("Cairns")
+                }).addTo(map)
+                L.marker([-31.9523, 115.8613], {
+                    icon: myIcon("Perth"),
+                    // riseOnHover: true,
+                    // title: myIcon("Perth")
+                }).addTo(map)
+                L.marker([-32.9283, 151.7817], {
+                    icon: myIcon("Newcastle"),
+                    // riseOnHover: true,
+                    // title: myIcon("Newcastle")
+                }).addTo(map)
+
+                // .setView([147.0967,-36.0406 ], 13)
+            
+                map.fitBounds(L.latLngBounds([
+                    [-27, 148],
+                    [-34, 154]
+                ]));
+
+                L.control.zoom({
+                    position: 'bottomright'
+                }).addTo(map);
+                console.log(map.getBounds())
+                // vector.bindPopup(function (layer) {
+                //     return layer.feature.properties.description;
+                // }) 
             })
-}
+            .catch(error => console.log(error));
+    })
 
-$("input[name='histanom']").change(e => {
-    anomtype = $(e.target).attr('id')
-    anom("anom", anomtype)
-})
+function tickcases(tickcasecomp) {
 
-function anom(type, strat) {
+    let dim = getdim("#tickcasescontainer")
 
-    let link = ""
-    let comp = ""
+    // fetch("./data/areasummaries.json")
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         let tsobs = data.filters(a => SELECTED_AREAS.includes(a.areaname)).forEach(d => {
 
-    switch(strat){
-        case "histanomoverall":
-            link = "./data/change_overall.json"
-            break;
-        case "histanomstate":
-            link = "./data/change_state.json"
-            comp = "state"
-            break;
-        case "histanomregion":
-            link = "./data/change_region.json"
-            comp = "Region"
-            break;
-        default:
-            link = "./data/overall_stl.json"
-    }
+    //         })
+    //         // let tstrend = 
+    //         // let tscum = 
+    //     })
 
-    fetch(link)
+    fetch("./data/" + tickcasecomp + "_yearly_cases.json")
         .then(response => response.json())
         .then(data => {
-            let dim = getdim("#tickanomcontainer")
-            anomalieschart(data, {
-                x: d => new Date(d.date),
-                y: d => d[type],
-                z: d => d[comp],
-                width: dim.width,
-                height: dim.height - 110,
-                color: "#4e79a7",
-                div: "#" + type
-            })
-
-        })
-
-}
-
-//////// Event Handlers for Admissions and Tick cases
-$("input[name='tickcasecomp']").change(e => {
-    tickcasecomp = $(e.target).attr('id')
-    tickcases(tickcasecomp, tickcasetype)
-})
-
-$("input[name='tickcasetype']").change(e => {
-    tickcasetype = $(e.target).attr('id')
-    tickcases(tickcasecomp, tickcasetype)
-})
-
-$("input[name='tickadmcomp']").change(e => {
-    tickadmcomp = $(e.target).attr('id')
-    tickadmissions(tickadmcomp, tickadmtype)
-})
-
-$("input[name='tickadmtype']").change(e => {
-    tickadmtype = $(e.target).attr('id')
-    tickadmissions(tickadmcomp, tickadmtype)
-})
-
-function tickadmissions(tickadmcomp, tickadmtype) {
-    let link = ""
-    let comb = tickadmcomp + "~" + tickadmtype
-    console.log(comb)
-    switch(comb) {
-        case "tickadmcompoverall~tickadmtypeyear":
-            link = "./data/overall_yearly_admissions.json"
-            break;
-        case "tickadmcompstate~tickadmtypeyear":
-            link = "./data/state_yearly_admissions.json"
-            break;
-        case "tickadmcompregion~tickadmtypeyear":
-            link = "./data/regions_yearly_admissions.json"
-            break;
-        case "tickadmcompoverall~tickadmtypemonth":
-            link = "./data/overall_monthly_admissions.json"
-            break;
-        case "tickadmcompstate~tickadmtypemonth":
-            link = "./data/state_monthly_admissions.json"
-            break;
-        case "tickadmcompregion~tickadmtypemonth":
-            link = "./data/regions_monthly_admissions.json"
-            break;
-        case "tickadmcompoverall~tickadmtypecumulative":
-            link = "./data/overall_cumulative_admissions.json"
-            break;
-        case "tickadmcompstate~tickadmtypecumulative":
-            link = "./data/state_cumulative_admissions.json"
-            break;
-        case "tickadmcompregion~tickadmtypecumulative":
-            link = "./data/regions_cumulative_admissions.json"
-            break;
-        default:
-            link = "./data/overall_monthly_admissions.json"
-    }
-    fetch(link)
-        .then(response => response.json())  
-        .then(data => {
-            let dim = getdim("#tickadmscontainer")
             linechart(data, {
-                x: d => tickadmtype == "tickadmtypeyear" ? d.date : new Date(d.date),
+                x: d => new Date(d.date),
                 y: d => d.n,
                 z: d => d.strat,
-                height: dim.height - 100,
-                width: dim.width,
+                height: dim.width *0.4, 
+                width: dim.width ,
                 color: "#4e79a7",
-                div: "#tickadmissions",
+                div: "#tickcasesobs",
                 xLabel: "Date →",
-                yLabel: "↑ Total"
-            })
-
-        })
-
-}
-
-function tickcases(tickcasecomp, tickcasetype, div) {
-    let link = ""
-    let comb = tickcasecomp + "~" + tickcasetype
-    
-    switch(comb) {
-        case "tickcasecompoverall~tickcasetypeyear":
-            link = "./data/overall_yearly_cases.json"
-            break;
-        case "tickcasecompstate~tickcasetypeyear":
-            link = "./data/state_yearly_cases.json"
-            break;
-        case "tickcasecompregion~tickcasetypeyear":
-            link = "./data/regions_yearly_cases.json"
-            break;
-        case "tickcasecompoverall~tickcasetypemonth":
-            link = "./data/overall_monthly_cases.json"
-            break;
-        case "tickcasecompstate~tickcasetypemonth":
-            link = "./data/state_monthly_cases.json"
-            break;
-        case "tickcasecompregion~tickcasetypemonth":
-            link = "./data/regions_monthly_cases.json"
-            break;
-        case "tickcasecompoverall~tickcasetypecumulative":
-            link = "./data/overall_cumulative_cases.json"
-            break;
-        case "tickcasecompstate~tickcasetypecumulative":
-            link = "./data/state_cumulative_cases.json"
-            break;
-        case "tickcasecompregion~tickcasetypecumulative":
-            link = "./data/regions_cumulative_cases.json"
-            break;
-        default:
-            link = "./data/overall_monthly_cases.json"
-    }
-    
-    fetch(link)
-        .then(response => response.json())
-        .then(data => {
-            let dim = getdim("#tickcasescontainer")
-            linechart(data, {
-                x: d => new Date(d.date),
-                y: d => d.n,
-                z: d => d.strat,
-                height: dim.height ? dim.height - 100 : 300,
-                width: dim.width ? dim.width : 100,
-                color: "#4e79a7",
-                div: "#tickcases",
-                xLabel: comb.includes("year") ? "Year →" : "Date →",
                 yLabel: "↑ Total",
             })
 
         })
 
+    fetch("./data/" + tickcasecomp + "_monthly_cases.json")
+        .then(response => response.json())
+        .then(data => {
+            linechart(data, {
+                x: d => new Date(d.date),
+                y: d => d.n,
+                z: d => d.strat,
+                height: dim.width *0.4,
+                width: dim.width,
+                color: "#4e79a7",
+                div: "#tickcasestrend",
+                xLabel: "Date →",
+                yLabel: "↑ Total",
+            })
+
+        })
+
+    fetch("./data/" + tickcasecomp + "_cumulative_cases.json")
+        .then(response => response.json())
+        .then(data => {
+            linechart(data, {
+                x: d => new Date(d.date),
+                y: d => d.n,
+                z: d => d.strat,
+                height: dim.width *0.4,
+                width: dim.width ,
+                color: "#4e79a7",
+                div: "#tickcasescum",
+                xLabel: "Date →",
+                yLabel: "↑ Total",
+            })
+
+        })
+    
 }
-
-
-// FOR SEASONALITY AND TREND
-
-// $("input[name='radioseasonality']").change(e => {
-//     seasonalitytype = $(e.target).attr('id')
-//     stl("seasonal", seasonalitytype)
-// })
-
-// $("input[name='radiotrend']").change(e => {
-//     trendtype = $(e.target).attr('id')
-//     stl("trend", trendtype)
-// })
-
-// function stl(type, strat) {
-
-//     let link = ""
-
-//     switch(strat){
-//         case "trendoverall":
-//             link = "./data/overall_stl.json"
-//             break;
-//         case "trendstate":
-//             link = "./data/state_stl.json"
-//             break;
-//         case "trendregion":
-//             link = "./data/regions_stl.json"
-//             break;
-//         case "seasonalityoverall":
-//             link = "./data/overall_stl.json"
-//             break;
-//         case "seasonalitystate":
-//             link = "./data/state_stl.json"
-//             break;
-//         case "seasonalityregion":
-//             link = "./data/regions_stl.json"
-//             break;
-//         default:
-//             link = "./data/overall_stl.json"
-//     }
-
-//     fetch(link)
-//         .then(response => response.json())
-//         .then(data => {
-//             stllinechart(data, {
-//                 x: d => new Date(d.date),
-//                 y: d => d[type],
-//                 z: d => d.strat,
-//                 width: 450,
-//                 height: 200,
-//                 color: "#4e79a7",
-//                 div: "#" + type
-//             })
-
-//         })
-
-// }
