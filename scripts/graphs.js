@@ -1417,21 +1417,6 @@ function MultiLineChart(data, {
       svg.dispatch("input", {bubbles: true});
     }
 
-    // const handleZoom = (e) => {
-    //   // d3.select("#kmc").selectAll("svg").attr("transform", e.transform)
-    //   // xaxe.call(xAxis.scale(d3.event.transform.rescaleX(x)))
-    //   // xaxe.call(xAxis, xz)
-    //   xaci.call(xAxis.scale(e.transform.rescaleX(xScale)));
-    //   path.attr("d", line(I, e.transform.rescaleX(xScale)))
-    // };
-
-    // const zoom = d3.zoom()
-    //     .scaleExtent([1, 32])
-    //     .extent([[marginLeft, 0], [width - marginRight, height]])
-    //     .translateExtent([[marginLeft, -Infinity], [width - marginRight, Infinity]])
-    //     .on('zoom', handleZoom);
-
-    // d3.select(div).selectAll("svg").call(zoom)
     
     return Object.assign(svg.node(), { value: null });
 }

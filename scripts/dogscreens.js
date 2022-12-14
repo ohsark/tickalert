@@ -39,32 +39,32 @@ function _updateSelection(region) {
         SELECTED_AREAS = SELECTED_AREAS.filter(r => r.area != region.area)
     }
     console.log(SELECTED_AREAS)
-    _refreshStrats()
-    _updateCharts()
+    _refreshStratsDS()
+    _updateChartsDS()
 }
 
-function _updateCharts() {
+function _updateChartsDS() {
 
     let dim = getdim("#tickcasescontainer")
 
     fetch("./data/areasummaries.json")
         .then(response => response.json())
         .then(data => {
-            let tsobs = [],
-                tstrend = [], 
-                tscum = []
+            let tsDSobs = [],
+                tsDStrend = [], 
+                tsDScum = []
             
             data
                 .filter(a => SELECTED_AREAS.some(r => a.area == r.area))
                 .forEach(d => {
-                    tsobs.unshift(...d.tsobs.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
-                    tstrend.unshift(...d.tstrend.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
-                    tscum.unshift(...d.tscum.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
+                    tsDSobs.unshift(...d.tsDSobs.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
+                    tsDStrend.unshift(...d.tsDStrend.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
+                    tsDScum.unshift(...d.tsDScum.map(e => ({ ...e, strat : d.areaname ? d.areaname : d.area})))
                 })
 
-            console.log(tsobs)
+            console.log(tsDSobs)
             
-            MultiLineChart(tsobs, {
+            MultiLineChart(tsDSobs, {
                 x: d => new Date(d.date),
                 y: d => d.n,
                 z: d => d.strat,
@@ -76,7 +76,7 @@ function _updateCharts() {
                 yLabel: "↑ Total",
             })
     
-            MultiLineChart(tstrend, {
+            MultiLineChart(tsDStrend, {
                 x: d => new Date(d.date),
                 y: d => d.n,
                 z: d => d.strat,
@@ -88,7 +88,7 @@ function _updateCharts() {
                 yLabel: "↑ Total",
             })
     
-            MultiLineChart(tscum, {
+            MultiLineChart(tsDScum, {
                 x: d => new Date(d.date),
                 y: d => d.n,
                 z: d => d.strat,
@@ -128,11 +128,11 @@ function initialize_areafilters(areas) {
                 })
             }
         }
-        // _updateCharts()
+        // _updateChartsDS()
     })
 }
 
-function _refreshStrats() {
+function _refreshStratsDS() {
     $("#selectedregions").empty()
     SELECTED_AREAS.forEach(r => {
         if(r.areaname != "NonLGA") {
@@ -166,7 +166,7 @@ fetch('./data/areasummaries.json')
             .then(data => {
                 data = data.features.map(lga => {
                     if(lgas.includes(lga.properties.LGA_CODE20)) {
-                        lga.properties.total = lga_totals.filter(i => i.area == lga.properties.LGA_CODE20)[0].total
+                        lga.properties.total = lga_totals.filter(i => i.area == lga.properties.LGA_CODE20)[0].totalDS
                     } else {
                         lga.properties.total = NaN
                     }
@@ -174,13 +174,13 @@ fetch('./data/areasummaries.json')
                     return lga
                 })
                 let getColor = v => {
-                    return  v > 1000 ? '#800026' :
-                            v > 500  ? '#BD0026' :
-                            v > 200  ? '#E31A1C' :
-                            v > 100  ? '#FC4E2A' :
-                            v > 50   ? '#FD8D3C' :
-                            v > 20   ? '#FEB24C' :
-                            v > 10   ? '#FED976' :
+                    return  v > 10000 ? '#800026' :
+                            v > 5000  ? '#BD0026' :
+                            v > 2000  ? '#E31A1C' :
+                            v > 1000  ? '#FC4E2A' :
+                            v > 500   ? '#FD8D3C' :
+                            v > 200   ? '#FEB24C' :
+                            v > 100   ? '#FED976' :
                                         '#FFEDA0';
                 }
 
@@ -229,7 +229,7 @@ fetch('./data/areasummaries.json')
                                 weight: 1,
                                 fillOpacity: 1
                             });
-                            // data.resetStyle(layer)
+                            // data.resetsDStyle(layer)
                                 
                         }         
 
@@ -272,7 +272,7 @@ fetch('./data/areasummaries.json')
                 legend.onAdd = function (map) {
 
                     var div = L.DomUtil.create('div', 'info legend'),
-                        grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+                        grades = [0, 100, 200, 500, 1000, 2000, 5000, 10000],
                         labels = [];
                 
                     div.innerHTML +=
@@ -368,11 +368,11 @@ function tickcases(tickcasecomp) {
     // fetch("./data/areasummaries.json")
     //     .then(response => response.json())
     //     .then(data => {
-    //         let tsobs = data.filters(a => SELECTED_AREAS.includes(a.areaname)).forEach(d => {
+    //         let tsDSobs = data.filters(a => SELECTED_AREAS.includes(a.areaname)).forEach(d => {
 
     //         })
-    //         // let tstrend = 
-    //         // let tscum = 
+    //         // let tsDStrend = 
+    //         // let tsDScum = 
     //     })
 
     fetch("./data/" + tickcasecomp + "_yearly_cases.json")
