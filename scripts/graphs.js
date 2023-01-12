@@ -333,18 +333,18 @@ function forecast(data, {
     yType = d3.scaleLinear, // type of y-scale
     yDomain, // [ymin, ymax]
     yRange = [height - marginBottom, marginTop], // [bottom, top]
-	xLabel = "Date →",
-	yLabel = "↑ Total",
+    xLabel = "Date →",
+    yLabel = "↑ Total",
     yFormat, // a format specifier string for the y-axis
     color = "currentColor", // fill color of area
-	strokeLinecap = "round", // stroke line cap of the line
+	  strokeLinecap = "round", // stroke line cap of the line
     strokeLinejoin = "round", // stroke line join of the line
     strokeWidth = 1.5, // stroke width of line, in pixels
     strokeOpacity = 1, // stroke opacity of line
     div,
     forecastdate,
-	fit,
-	forecast 
+    fit,
+    forecast 
   } = {}) {
     // Compute values.
     const l5 = data[y][0];
@@ -360,8 +360,8 @@ function forecast(data, {
 	
     const X = d3.map(data[x], d => new Date(d))
     const I = d3.range(X.length)
-
-    let forecaststart = data[x].indexOf("2022-01-01")
+    console.log(l5)
+    let forecaststart = data[x].indexOf(forecastdate)
     // let forecastperiod = data[x].length - data[x].indexOf("2022-01-01")
 	
     if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(forecaststart) : X)
@@ -446,41 +446,41 @@ function forecast(data, {
 			.attr("d", area95(I.slice(0,forecaststart + 1)));
 		
 		svg.append("line")
-			.attr("x1", xScale(forecastdate)) 
+			.attr("x1", xScale(new Date(forecastdate))) 
 			.attr("y1", 0)
-			.attr("x2", xScale(forecastdate)) 
+			.attr("x2", xScale(new Date(forecastdate))) 
 			.attr("y2", height - marginBottom)
 				.style("stroke-width", 2)
 				.style("stroke", "#ddd")
 				.style("fill", "none");
 		
 		svg.append("text")
-        .attr("x", xScale(forecastdate) + 10) 
+        .attr("x", xScale(new Date(forecastdate)) + 10) 
         .attr("y", marginBottom)
       .style("font-weight", "bolder")
       .style("font-size", "0.825em")
       .style("fill", "#4e79a7")
       .append("tspan")
-        .attr('x', xScale(forecastdate) + 10)
+        .attr('x', xScale(new Date(forecastdate)) + 10)
 			  .text("Forecast")
       .append("tspan")
-        .attr('x', xScale(forecastdate) + 10)
+        .attr('x', xScale(new Date(forecastdate)) + 10)
         .attr('dy', 14)
         .text("→")
 			// .text("Forecast ")
 				
 
 		svg.append("text")
-        .attr("x", xScale(forecastdate) - 100) 
+        .attr("x", xScale(new Date(forecastdate)) - 100) 
         .attr("y", marginBottom)
       .style("font-weight", "bolder")
       .style("font-size", "0.825em")
       .style("fill", "#aaa")
       .append("tspan")
-        .attr('x', xScale(forecastdate) - 80)
+        .attr('x', xScale(new Date(forecastdate)) - 80)
 			  .text("Model Train")
       .append("tspan")
-        .attr('x', xScale(forecastdate) - 25)
+        .attr('x', xScale(new Date(forecastdate)) - 25)
         .attr('dy', 14)
         .text("←")
 
@@ -568,7 +568,7 @@ function forecast(data, {
 	    info.select(".tooltip-main").text(l50[i]);
       info.select(".tooltip-conf").text("[" + l5[i] + "-" + l95[i] + "]");
       
-      if(xm > xScale(forecastdate) -60) {
+      if(xm > xScale(new Date(forecastdate)) -60) {
         info.select(".conf-desc").attr("x", -105);
         info.select(".tooltip-date").attr("x", -100);
         info.select(".tooltip-main").attr("x", -100);
@@ -636,7 +636,7 @@ function forecastanomalies(data, {
     const l95 = data[y][8];
 	// let anomabove0 = 0
 	
-    let forecaststart = data[x].indexOf("2022-01-01")
+    let forecaststart = data[x].indexOf(forecastdate)
 
     const X = d3.map(data[x], d => new Date(d))
     const I = d3.range(X.length)
@@ -759,9 +759,9 @@ function forecastanomalies(data, {
         .attr("d", line(I.slice(forecaststart)));
 
 	svg.append("line")
-		.attr("x1", xScale(forecastdate))  //<<== change your code here
+		.attr("x1", xScale(new Date(forecastdate)))  //<<== change your code here
 		.attr("y1", 0)
-		.attr("x2", xScale(forecastdate))  //<<== and here
+		.attr("x2", xScale(new Date(forecastdate)))  //<<== and here
 		.attr("y2", height - marginBottom)
 			.style("stroke-width", 2)
 			.style("stroke", "#ddd")

@@ -132,18 +132,17 @@
         
     
     <script>
-        let lgadata = []
-        let regiondata
+        
 
-        fetch("./data/predictions_updated_27series.json")
-            .then(response => response.json())
-            .then(data => {
+        // fetch("./data/predictions.json")
+        //     .then(response => response.json())
+        //     .then(data => {
             
-            regiondata = data
-            selectedLGA = regiondata[0].lga
-            data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-left h6' data-lga='" + v.lga + "' href='#''>" + v.region + ", " + v.state + " - " + v.lga  +"</a>"))
-            populatepage("31000")
-        })
+        //     regiondata = data
+        //     selectedLGA = regiondata[0].lga
+        //     data.forEach(v => $("#regionselectoptions").append("<a class='dropdown-item text-left h6' data-lga='" + v.lga + "' href='#''>" + v.region + ", " + v.state + " - " + v.lga  +"</a>"))
+        //     populatepage("31000")
+        // })
 
     </script>
   </body>
