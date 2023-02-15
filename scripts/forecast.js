@@ -10,17 +10,15 @@ function populatepage(region) {
 
     lgadata = regiondata.filter(l => {
         if(l.lga == region) {
-            console.log(l.lga)
             return l
         }
     })[0]
     console.log(lgadata)
-
     setHeader(lgadata.region, lgadata.lga, lgadata.state)
 
     d3.select("#percentageworse").select("svg").remove()
     d3.select("#forecastspread").select("svg").remove()
-    d3.select("#forecastanomalies").select("svg").remove()
+    // d3.select("#forecastanomalies").select("svg").remove()
     d3.select("#thresholdprobability").select("svg").remove()
 
 
@@ -53,15 +51,15 @@ function populatepage(region) {
         // width: getdim("#thresholdcont").width,
         // height: getdim("#thresholdcont").height - 90,
         width: getdim("#thresholdprobability").width,
-        height: getdim("#thresholdprobability").width *0.3,
+        height: getdim("#thresholdprobability").width *0.5,
         color: "#4e79a7"
     })
     
-    forecast({forecast: lgadata["forecast"][0], date: lgadata["horizon"], fit: lgadata["forecastPoints"]}, {
+    forecast({forecast: lgadata["forecast"], date: lgadata["horizon"], obs: lgadata["observed"]}, {
         x : "date",
         y : "forecast",
         width: getdim("#forecastspread").width,
-        height: getdim("#forecastspread").width*0.35,
+        height: getdim("#forecastspread").width*0.45,
         color: "#4e79a7",
         div: "#forecastspread",
         forecastdate: lgadata.last_train
@@ -78,15 +76,15 @@ function populatepage(region) {
     //     forecastdate: new Date("2022-01-01")
     // })
 
-    forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
-        x : "date",
-        y : "forecast",
-        width: getdim("#forecastanomalies").width,
-        height: getdim("#forecastanomalies").width*0.15,
-        color: "#4e79a7",
-        div: "#forecastanomalies",
-        forecastdate: lgadata.last_train
-    })
+    // forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
+    //     x : "date",
+    //     y : "forecast",
+    //     width: getdim("#forecastanomalies").width,
+    //     height: getdim("#forecastanomalies").width*0.15,
+    //     color: "#4e79a7",
+    //     div: "#forecastanomalies",
+    //     forecastdate: lgadata.last_train
+    // })
 
 }
 
@@ -99,52 +97,52 @@ $("input[id='inclforecast']").change(e => {
     d3.select("#forecastanomalies").select("svg").remove()
     
     if(include) {
-        forecast({forecast: lgadata["forecast"][0], date: lgadata["horizon"], fit: lgadata["forecastPoints"]}, {
+        forecast({forecast: lgadata["forecast"], date: lgadata["horizon"], obs: lgadata["observed"]}, {
             x : "date",
             y : "forecast",
             yLabel: "↑ Total",
             width: getdim("#forecastspread").width,
-            height: getdim("#forecastspread").width*0.35,
+            height: getdim("#forecastspread").width*0.45,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: lgadata.last_train,
             forecast: true
         })
     
-        forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
-            x : "date",
-            y : "forecast",
-            width: getdim("#forecastanomalies").width,
-            height: getdim("#forecastanomalies").width*0.15,
-            color: "#4e79a7",
-            div: "#forecastanomalies",
-            forecastdate: lgadata.last_train,
-            forecast: true
-        })
+        // forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
+        //     x : "date",
+        //     y : "forecast",
+        //     width: getdim("#forecastanomalies").width,
+        //     height: getdim("#forecastanomalies").width*0.15,
+        //     color: "#4e79a7",
+        //     div: "#forecastanomalies",
+        //     forecastdate: lgadata.last_train,
+        //     forecast: true
+        // })
     } else {
-        forecast({forecast: lgadata["forecast"][0], date: lgadata["horizon"], fit: lgadata["forecastPoints"]}, {
+        forecast({forecast: lgadata["forecast"], date: lgadata["horizon"], obs: lgadata["observed"]}, {
             x : "date",
             y : "forecast",
             yLabel: "↑ Total",
             width: getdim("#forecastspread").width ,
-            height: getdim("#forecastspread").width*0.35,
+            height: getdim("#forecastspread").width*0.45,
             color: "#4e79a7",
             div: "#forecastspread",
             forecastdate: lgadata.last_train
             
         })
     
-        forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
-            x : "date",
-            y : "forecast",
-            // width: getdim("#forecastspread").width - 60,
-            // height: getdim("#forecastspread").height*0.25,
-            width: getdim("#forecastanomalies").width,
-            height: getdim("#forecastanomalies").width*0.15,
-            color: "#4e79a7",
-            div: "#forecastanomalies",
-            forecastdate: lgadata.last_train
-        })
+        // forecastanomalies({forecast: lgadata["anomalies"], date: lgadata["horizon"]}, {
+        //     x : "date",
+        //     y : "forecast",
+        //     // width: getdim("#forecastspread").width - 60,
+        //     // height: getdim("#forecastspread").height*0.25,
+        //     width: getdim("#forecastanomalies").width,
+        //     height: getdim("#forecastanomalies").width*0.15,
+        //     color: "#4e79a7",
+        //     div: "#forecastanomalies",
+        //     forecastdate: lgadata.last_train
+        // })
     }
 })
 
@@ -183,7 +181,7 @@ $("input[name='threshold']").change(e => {
         // width: getdim("#thresholdcont").width,
         // height: getdim("#thresholdcont").height - 90,
         width: getdim("#thresholdprobability").width,
-        height: getdim("#thresholdprobability").width*0.3,
+        height: getdim("#thresholdprobability").width*0.5,
         color: "#4e79a7"
     })
 })
@@ -207,7 +205,7 @@ fetch("./data/predictions.json")
                 .then(data => {
                     data = data.features.map(lga => {
                         if(lgas.includes(lga.properties.LGA_CODE20)) {
-                            lga.properties.total = regiondata.filter(e => e.lga == lga.properties.LGA_CODE20)[0].total
+                            lga.properties.total = regiondata.filter(e => e.lga == lga.properties.LGA_CODE20)[0].risk
                             // lga.properties.total = lga_totals.filter(i => i.lga_code == lga.properties.LGA_CODE20)[0].total
                         } else {
                             lga.properties.total = NaN
@@ -215,19 +213,47 @@ fetch("./data/predictions.json")
                         // lga.properties.state = lga_totals.filter(i => i.lga_code == lga.properties.LGA_CODE20)[0].state
                         return lga
                     })
-                    let getColor = v => {
-                        return  v > 1000 ? '#800026' :
-                                v > 500  ? '#BD0026' :
-                                v > 200  ? '#E31A1C' :
-                                v > 100  ? '#FC4E2A' :
-                                v > 50   ? '#FD8D3C' :
-                                v > 20   ? '#FEB24C' :
-                                v > 10   ? '#FED976' :
-                                            '#FFEDA0';
+                    // let getColor = v => {
+                    //     return  v > 1000 ? '#800026' :
+                    //             v > 500  ? '#BD0026' :
+                    //             v > 200  ? '#E31A1C' :
+                    //             v > 100  ? '#FC4E2A' :
+                    //             v > 50   ? '#FD8D3C' :
+                    //             v > 20   ? '#FEB24C' :
+                    //             v > 10   ? '#FED976' :
+                    //                         '#FFEDA0';
+                    // }
+
+                    let unavailablePatch = `<linearGradient id="stripes" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset=0 stop-color=${'#333'}/>
+                                                <stop offset=50% stop-color=${'#333'}/>
+                                                <stop offset=50% stop-color=${'#fff'}/>
+                                                <stop offset=100% stop-color=${'#fff'}/>
+                                            </linearGradient>`
+
+                    let getRiskColor = v => {
+                        return  v <= 5 ? '#ffa1a1' :
+                                v <= 10  ? '#ff9090' :
+                                v <= 15  ? '#ff8080' :
+                                v <= 20  ? '#ff7070' :
+                                v <= 25   ? '#ff5f5f' :
+                                v <= 30   ? '#ff4f4f' :
+                                v <= 35   ? '#ff3f3f' :
+                                v <= 40   ? '#ff2e2e' :
+                                v <= 45   ? '#ff1e1e' :
+                                v <= 50   ? '#ff0e0e' :
+                                v <= 55   ? '#fc0000' :
+                                v <= 60   ? '#ec0000' :
+                                v <= 65   ? '#dc0000' :
+                                v <= 70   ? '#c00' :
+                                v <= 75   ? '#b00' :
+                                v <= 80   ? '#ab0000' :
+                                v <= 85   ? '#9b0000' :
+                                v <= 90   ? '#8a0000' :
+                                v <= 95   ? '#7a0000' :
+                                            '#6a0000';
                     }
 
-                    let maxTotal = Math.max(...regiondata.map(i => i.total))
-                    console.log(maxTotal)
                     let map = L.map('map', {
                         zoomControl: false
                     })
@@ -248,9 +274,9 @@ fetch("./data/predictions.json")
 
                                 layer.setStyle({
                                     weight: 2,
-                                    color: '#777',
+                                    color: feature.properties.total ? getRiskColor(feature.properties.total) : 'url(#repeat)',
                                     dashArray: '',
-                                    fillOpacity: 0.7
+                                    color: "#00A7B970"
                                 });
                                 
                                 layer.bindTooltip("<div><b>" + feature.properties.LGA_NAME20 + "</b><div>Total:<b>" + feature.properties.total + "</b></div></div>").openTooltip()
@@ -265,8 +291,8 @@ fetch("./data/predictions.json")
                                 let layer = e.target;
                                 layer.closeTooltip()
                                 layer.setStyle({
-                                    fillColor: feature.properties.total ? getColor(feature.properties.total) : "#fff",
-                                    color: "#ccc",
+                                    fillColor: feature.properties.total ? getRiskColor(feature.properties.total) : 'url(#repeat)',
+                                    color: "#ddd",
                                     weight: 1,
                                     fillOpacity: 1
                                 });
@@ -276,16 +302,13 @@ fetch("./data/predictions.json")
 
                             if(feature.properties.total)  {
                                 style = {
-                                    // fillColor: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")",
-                                    // color: "rgba(0, 0, 200, " + (feature.properties.total/maxTotal).toFixed(2)  + ")"
-                                    fillColor: getColor(feature.properties.total),
-                                    // color: getColor(feature.properties.total),
+                                    fillColor: getRiskColor(feature.properties.total),
                                     weight: 1
                                 }
                             } else {
                                 style = {
-                                    fillColor: "#fff",
-                                    color: "#ccc",
+                                    fillColor: 'url(#repeat)',
+                                    color: "#ddd",
                                     // dashArray: "5",                                   
                                 }
                             }
@@ -300,7 +323,7 @@ fetch("./data/predictions.json")
                         },
                         style: {
                             // color: "#EC5858",
-                            color: "#ccc",
+                            color: "#eee",
                             weight: 1,
                             // fillColor: "#fff",
                             fillColor: "#fff",
@@ -312,21 +335,31 @@ fetch("./data/predictions.json")
 
                     legend.onAdd = function (map) {
 
-                        var div = L.DomUtil.create('div', 'info legend'),
-                            grades = [0, 10, 20, 50, 100, 200, 500, 1000],
-                            labels = [];
-                    
+                        var div = L.DomUtil.create('div', 'info-risk legend-risk')
+
                         div.innerHTML +=
-                            '<div class="mb-1"><b style="font-size:0.825rem">Count Range</b></div>' +
-                            '<i class="border" style="background-color:#fff"></i> ' +
-                            'Data Not Available <br>';
+                            // '<div class="mb-1"><b style="font-size:0.825rem">Count Range</b></div>' +
+                            `<div>
+                                <div style="display:flex;justify-content: space-between; color: #555">
+                                    <span> 0% </span>
+                                    <span> 100% </span>
+                                </div>
+                            </div>`
 
                         // loop through our density intervals and generate a label with a colored square for each interval
-                        for (var i = 0; i < grades.length; i++) {
+                        for (var i = 1; i < 100; i+=5) {
                             div.innerHTML +=
-                                '<i class="border" style="background-color:' + getColor(grades[i] + 1) + '"></i> ' +
-                                grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+' );
+                                '<i class="border-risk" style="background-color:' + getRiskColor(i) + '"></i> ' 
                         }
+
+                        div.innerHTML +=
+                            // '<div class="mb-1"><b style="font-size:0.825rem">Count Range</b></div>' +
+                            `<br><i class="border" style="background-image:repeating-linear-gradient(
+                                -45deg,
+                                transparent 0 1px,
+                                rgb(204,204,204) 1px 3px
+                              ); margin-right: 5px"></i> ` +
+                            `Data Not Available <br>`
                         
                         return div;
                     };
@@ -387,17 +420,29 @@ fetch("./data/predictions.json")
                     // .setView([147.0967,-36.0406 ], 13)
                 
                     map.fitBounds(L.latLngBounds([
-                        [-27, 148],
+                        [-26, 148],
                         [-34, 154]
                     ]));
 
                     L.control.zoom({
                         position: 'bottomright'
                     }).addTo(map);
-                    console.log(map.getBounds())
-                    // vector.bindPopup(function (layer) {
-                    //     return layer.feature.properties.description;
-                    // }) 
+
+                    let gradientString = `<linearGradient id="repeat" spreadMethod="repeat" x1="3%" y1="4%" x2="6%" y2="6%">
+                                                <stop offset="0%" stop-color=${"#eee"} />
+                                                <stop offset="25%" stop-color=${"#eee"} />
+                                                <stop offset="25%" stop-color=${"#fff"} />
+                                                <stop offset="100%" stop-color=${"#fff"} />
+                                            </linearGradient>`
+
+                    // let repeatString = `<linearGradient id="repeat" xlink:href="#stripes"  />`
+                    
+                    let svg = document.getElementsByTagName('svg')[0];
+                    let svgDefs = document.createElementNS("http://www.w3.org/2000/svg", 'defs');
+                    svgDefs.insertAdjacentHTML('afterbegin', gradientString);
+                    // svgDefs.insertAdjacentHTML('afterbegin', repeatString);
+                    svg.appendChild(svgDefs); 
+                    
                 })
                 .catch(error => console.log(error));
 

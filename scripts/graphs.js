@@ -356,52 +356,58 @@ function forecast(data, {
     const l70 = data[y][6];
     const l80 = data[y][7];
     const l95 = data[y][8];
-	  const modelFit = data["fit"]
+	  const obs = data["obs"]
 	
     const X = d3.map(data[x], d => new Date(d))
-    const I = d3.range(X.length)
-    console.log(l5)
+    const I = d3.range(data.date.length)
     let forecaststart = data[x].indexOf(forecastdate)
-    // let forecastperiod = data[x].length - data[x].indexOf("2022-01-01")
-	
-    if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(forecaststart) : X)
+    
+
+    if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(forecaststart + 1) : X)
     if (yDomain === undefined) yDomain = [d3.min(d3.map(data[y], d => d3.min(d))) < 0 ? d3.min(d3.map(data[y], d => d3.min(d))) : 0, d3.max(d3.map(data[y], d => d3.max(d)))];
     // Construct scales and axes.
-
+    console.log(l95)
     const xScale = xType(xDomain, xRange);
     const yScale = yType(yDomain, yRange);
     const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
     const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
-  
+    console.log(X[forecaststart])
     // Construct an area generator.
     const area95 = d3.area()
         .curve(curve)
         .x(i => xScale(X[i]))
-        .y0(i => yScale(l5[i]))
-        .y1(i => yScale(l95[i]));
+        .y0(i => {
+          return(yScale(l5[(i - X.length) + I.slice(forecaststart + 1).length]))
+        })
+        .y1(i => yScale(l95[(i - X.length) + I.slice(forecaststart + 1).length]));
 	
     const area80 = d3.area()
           .curve(curve)
           .x(i => xScale(X[i]))
-          .y0(i => yScale(l20[i]))
-          .y1(i => yScale(l80[i]));
+          .y0(i => yScale(l20[(i - X.length) + I.slice(forecaststart + 1).length]))
+          .y1(i => yScale(l80[(i - X.length) + I.slice(forecaststart + 1).length]));
 
     const area70 = d3.area()
           .curve(curve)
           .x(i => xScale(X[i]))
-          .y0(i => yScale(l30[i]))
-          .y1(i => yScale(l70[i]));
+          .y0(i => yScale(l30[(i - X.length) + I.slice(forecaststart + 1).length]))
+          .y1(i => yScale(l70[(i - X.length) + I.slice(forecaststart + 1).length]));
     
     const area60 = d3.area()
           .curve(curve)
           .x(i => xScale(X[i]))
-          .y0(i => yScale(l40[i]))
-          .y1(i => yScale(l60[i]));
+          .y0(i => yScale(l40[(i - X.length) + I.slice(forecaststart + 1).length]))
+          .y1(i => yScale(l60[(i - X.length) + I.slice(forecaststart + 1).length]));
     
 	const line = d3.line()
 		.curve(curve)
 		.x(i => xScale(X[i]))
-		.y(i => yScale(l50[i]));
+		.y(i => yScale(l50[(i - X.length) + I.slice(forecaststart + 1).length]));
+
+  const obs_data = d3.line()
+		.curve(curve)
+		.x(i => xScale(X[i]))
+		.y(i => yScale(obs[i] == "NA" ? 0 : obs[i]));
         
 	const svg = d3.select(div)
 		.append("svg")
@@ -409,10 +415,10 @@ function forecast(data, {
 			.attr("height", height)
 			.attr("viewBox", [0, 0, width, height])
 			.attr("style", "max-width: 100%; height: auto; height: intrinsic;overflow: visible")
-			.on("pointerenter", pointerentered)
-			.on("pointermove", pointermoved)
-			.on("pointerleave", pointerleft)
-			.on("touchstart", event => event.preventDefault());;
+			// .on("pointerenter", pointerentered)
+			// .on("pointermove", pointermoved)
+			// .on("pointerleave", pointerleft)
+			// .on("touchstart", event => event.preventDefault());;
 
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
@@ -441,76 +447,86 @@ function forecast(data, {
             .text(yLabel));
 
 	if (!forecast) {
-		svg.append("path")
-			.attr("fill", "#ddd")
-			.attr("d", area95(I.slice(0,forecaststart + 1)));
+		// svg.append("path")
+		// 	.attr("fill", "#ddd")
+		// 	.attr("d", area95(I.slice(0,forecaststart + 1)));
+
+    svg.append("path")
+        .attr("fill", "none")
+        .attr("stroke", "#43718f")
+        .attr("stroke-width", strokeWidth)
+        .attr("stroke-linecap", strokeLinecap)
+        .attr("stroke-linejoin", strokeLinejoin)
+        .attr("stroke-opacity", strokeOpacity)
+        .attr("d", obs_data(I.slice(0,forecaststart+1)));
 		
 		svg.append("line")
-			.attr("x1", xScale(new Date(forecastdate))) 
+			.attr("x1", xScale(X[forecaststart])) 
 			.attr("y1", 0)
-			.attr("x2", xScale(new Date(forecastdate))) 
+			.attr("x2", xScale(X[forecaststart])) 
 			.attr("y2", height - marginBottom)
-				.style("stroke-width", 2)
-				.style("stroke", "#ddd")
-				.style("fill", "none");
+				.style("stroke-width", 1)
+				.style("stroke", "#ccc")
+				.style("fill", "none")
+        .style("stroke-dasharray", 3);
 		
 		svg.append("text")
-        .attr("x", xScale(new Date(forecastdate)) + 10) 
+        .attr("x", xScale(X[forecaststart]) + 10) 
         .attr("y", marginBottom)
       .style("font-weight", "bolder")
       .style("font-size", "0.825em")
       .style("fill", "#4e79a7")
       .append("tspan")
-        .attr('x', xScale(new Date(forecastdate)) + 10)
+        .attr('x', xScale(X[forecaststart]) + 10)
 			  .text("Forecast")
       .append("tspan")
-        .attr('x', xScale(new Date(forecastdate)) + 10)
+        .attr('x', xScale(X[forecaststart]) + 10)
         .attr('dy', 14)
         .text("→")
 			// .text("Forecast ")
 				
 
 		svg.append("text")
-        .attr("x", xScale(new Date(forecastdate)) - 100) 
+        .attr("x", xScale(X[forecaststart + 1]) - 100) 
         .attr("y", marginBottom)
       .style("font-weight", "bolder")
       .style("font-size", "0.825em")
       .style("fill", "#aaa")
       .append("tspan")
-        .attr('x', xScale(new Date(forecastdate)) - 80)
-			  .text("Model Train")
+        .attr('x', xScale(X[forecaststart]) - 80)
+			  .text("Observed")
       .append("tspan")
-        .attr('x', xScale(new Date(forecastdate)) - 25)
+        .attr('x', xScale(X[forecaststart]) - 25)
         .attr('dy', 14)
         .text("←")
 
-		svg.append("g")
-			.attr("fill", "#000")
-			.selectAll("circle")
-			.data(I.slice(0,forecaststart))
-			.join("circle")
-				.attr("cx", i => xScale(X[i]))
-				.attr("cy", i => yScale(modelFit[i]))
-				.attr("r", i => modelFit[i] == "NA" ? 0 : 3.5)
-        .attr("stroke", "white")
-        .attr("stroke-width", 1.5)
+		// svg.append("g")
+		// 	.attr("fill", "#000")
+		// 	.selectAll("circle")
+		// 	.data(I.slice(0,forecaststart))
+		// 	.join("circle")
+		// 		.attr("cx", i => xScale(X[i]))
+		// 		.attr("cy", i => yScale(modelFit[i]))
+		// 		.attr("r", i => modelFit[i] == "NA" ? 0 : 3.5)
+    //     .attr("stroke", "white")
+    //     .attr("stroke-width", 1.5)
 	}
 
 	svg.append("path")
 		.attr("fill", "#d5eeff")
-		.attr("d", area95(I.slice(forecaststart)));
+		.attr("d", area95(I.slice(forecaststart + 1)));
 
     svg.append("path")
 		.attr("fill", "#bcd8ec")
-		.attr("d", area80(I.slice(forecaststart)));
+		.attr("d", area80(I.slice(forecaststart + 1)));
 	
 	svg.append("path")
 		.attr("fill", "#a4c3d8")
-		.attr("d", area70(I.slice(forecaststart)));
+		.attr("d", area70(I.slice(forecaststart + 1)));
 
 	svg.append("path")
 		.attr("fill", "#8baec6")
-		.attr("d", area60(I.slice(forecaststart)));
+		.attr("d", area60(I.slice(forecaststart + 1)));
 	
 	svg.append("path")
         .attr("fill", "none")
@@ -519,80 +535,80 @@ function forecast(data, {
         .attr("stroke-linecap", strokeLinecap)
         .attr("stroke-linejoin", strokeLinejoin)
         .attr("stroke-opacity", strokeOpacity)
-        .attr("d", line(I.slice(forecaststart)));
+        .attr("d", line(I.slice(forecaststart + 1)));
 
-	const info = svg.append("g")
-        .attr("class", "focus zindex-tooltip")
-        .attr("display", "none")
-		.attr("overflow", "visible");
+	// const info = svg.append("g")
+  //       .attr("class", "focus zindex-tooltip")
+  //       .attr("display", "none")
+	// 	.attr("overflow", "visible");
   
-    info.append("line")
-      .attr("x1", 0) 
-      .attr("y1", 0)
-      .attr("x2", 0) 
-      .attr("y2", height - marginBottom)
-        .style("stroke-width", 1)
-        .style("stroke", "#000")
-        .style("fill", "none");
+  //   info.append("line")
+  //     .attr("x1", 0) 
+  //     .attr("y1", 0)
+  //     .attr("x2", 0) 
+  //     .attr("y2", height - marginBottom)
+  //       .style("stroke-width", 1)
+  //       .style("stroke", "#000")
+  //       .style("fill", "none");
 
-    info.append("rect")
-        .attr("class", "conf-desc")
-        .attr("width", 100)
-        .attr("height", 70)
-        .attr("y", 0)
-        .attr("rx", 4)
-        .attr("ry", 4)
-		.attr("fill", "#fff")
-		.attr("stroke", "#333");
+  //   info.append("rect")
+  //       .attr("class", "conf-desc")
+  //       .attr("width", 100)
+  //       .attr("height", 70)
+  //       .attr("y", 0)
+  //       .attr("rx", 4)
+  //       .attr("ry", 4)
+	// 	.attr("fill", "#fff")
+	// 	.attr("stroke", "#333");
   
-    info.append("text")
-        .attr("class", "tooltip-date")
-        .attr("y", 18);
+  //   info.append("text")
+  //       .attr("class", "tooltip-date")
+  //       .attr("y", 18);
 	
-	  info.append("text")
-        .attr("class", "tooltip-main")
-        .attr("y", 40)
-		.attr("font-weight", "bold")
-		.attr("font-size", "1.1rem");
+	//   info.append("text")
+  //       .attr("class", "tooltip-main")
+  //       .attr("y", 40)
+	// 	.attr("font-weight", "bold")
+	// 	.attr("font-size", "1.1rem");
   
-    info.append("text")
-        .attr("class", "tooltip-conf")
-        .attr("y", 60);
+  //   info.append("text")
+  //       .attr("class", "tooltip-conf")
+  //       .attr("y", 60);
   
-    function pointermoved(event) {
-      const [xm, ym] = d3.pointer(event);
-      const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(l5[i]) - ym)); // closest point
+  //   function pointermoved(event) {
+  //     const [xm, ym] = d3.pointer(event);
+  //     const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(l5[i]) - ym)); // closest point
      
-      info.attr("transform", `translate(${xScale(X[i])},${0})`);
-      info.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
-	    info.select(".tooltip-main").text(l50[i]);
-      info.select(".tooltip-conf").text("[" + l5[i] + "-" + l95[i] + "]");
+  //     info.attr("transform", `translate(${xScale(X[i])},${0})`);
+  //     info.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
+	//     info.select(".tooltip-main").text(l50[i]);
+  //     info.select(".tooltip-conf").text("[" + l5[i] + "-" + l95[i] + "]");
       
-      if(xm > xScale(new Date(forecastdate)) -60) {
-        info.select(".conf-desc").attr("x", -105);
-        info.select(".tooltip-date").attr("x", -100);
-        info.select(".tooltip-main").attr("x", -100);
-        info.select(".tooltip-conf").attr("x", -100);
-      } else {
-        info.select(".conf-desc").attr("x", 5);
-        info.select(".tooltip-date").attr("x", 10);
-        info.select(".tooltip-main").attr("x", 10);
-        info.select(".tooltip-conf").attr("x", 10);
-      }
+  //     if(xm > xScale(new Date(forecastdate)) -60) {
+  //       info.select(".conf-desc").attr("x", -105);
+  //       info.select(".tooltip-date").attr("x", -100);
+  //       info.select(".tooltip-main").attr("x", -100);
+  //       info.select(".tooltip-conf").attr("x", -100);
+  //     } else {
+  //       info.select(".conf-desc").attr("x", 5);
+  //       info.select(".tooltip-date").attr("x", 10);
+  //       info.select(".tooltip-main").attr("x", 10);
+  //       info.select(".tooltip-conf").attr("x", 10);
+  //     }
 
-    }
+  //   }
   
-    function pointerentered() {
-    //   path.style("mix-blend-mode", null).style("stroke", "#ddd");
-      info.attr("display", null);
-    }
+  //   function pointerentered() {
+  //   //   path.style("mix-blend-mode", null).style("stroke", "#ddd");
+  //     info.attr("display", null);
+  //   }
   
-    function pointerleft() {
-    //   path.style("mix-blend-mode", "multiply").style("stroke", null);
-      info.attr("display", "none");
-      svg.node().value = null;
-      svg.dispatch("input", {bubbles: true});
-    }
+  //   function pointerleft() {
+  //   //   path.style("mix-blend-mode", "multiply").style("stroke", null);
+  //     info.attr("display", "none");
+  //     svg.node().value = null;
+  //     svg.dispatch("input", {bubbles: true});
+  //   }
     
 
     return svg.node();
@@ -1007,10 +1023,10 @@ function forecasttrend(data, {
 		.attr("y1", yScale(0.7))
 		.attr("x2", width)  
 		.attr("y2", yScale(0.7))
-			.style("stroke-width", 1)
-			.style("stroke", "#777")
-			.style("fill", "none")
-			.style("border", "5px solid #fff");
+    .style("stroke-width", 1)
+    .style("stroke", "#777")
+    .style("fill", "none")
+    .style("stroke-dasharray", 3);
   
     return svg.node();
 }
