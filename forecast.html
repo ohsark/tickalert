@@ -32,16 +32,22 @@
                 <span class="text-secondary h5 page-title">Historic Data Analysis</span>
             </div>
         </nav> -->
-        <div class="row h-100" style="background-color: #9bbff4;">
+        <div class="row h-100" style="background-color: #9bbff4;" id="map-container">
             <div class="col-5 h-100 px-0" >
                 <div class="d-flex flex-column bg-white px-2 py-3 rounded-lg rounded shadow border" style="z-index: 10000; position: absolute;  top: 10px; left : 10px">
                     <div class="mb-0 h4 font-weight-bold align-items-center"><span class="text-danger">Tick </span><span>Alert</span><i class="fa-solid fa-shield-dog ms-2"></i> </div>
                     <!-- <span class="text-secondary h6">Tick Paralysis Forecast</span> -->
                     <span class="text-secondary h6 mt-1 mb-0">Canine tick paralysis forecast</span>
                 </div>
-                <div id="map">
-                    <h1 style="z-index: 10000000;">sDOL:JIfhu</h1>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons" style="z-index: 10000; position: absolute;  top: 10px; right : 10px">
+                    <label class="btn btn-sm btn-light active">
+                      <input type="radio" name="mapoptions" value="predictiverisk" checked> Predictive risk 
+                    </label>
+                    <label class="btn btn-sm btn-light">
+                      <input type="radio" name="mapoptions"> Total observed cases
+                    </label>
                 </div>
+                <div id="map"></div>
             </div>
 
             <div class="col-7 overflow-auto h-100 rounded-left rounded-lg bg-white shadow border">
@@ -130,6 +136,8 @@
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script> 
     
-    
+    <script>
+        plotMap(risk = true)
+    </script>
   </body>
 </html>
