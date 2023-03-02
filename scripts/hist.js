@@ -276,7 +276,7 @@ fetch('./data/areasummaries.json')
                         labels = [];
                 
                     div.innerHTML +=
-                        '<div class="mb-1"><b style="font-size:0.825rem">Count Range</b></div>' +
+                        '<div class="mb-1"><b style="font-size:0.825rem">Total observed cases</b></div>' +
                         '<i class="border" style="background-color:#fff"></i> ' +
                         'Data Not Available <br>';
 

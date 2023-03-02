@@ -65,7 +65,7 @@ function percentageworse(data, {
 		.selectAll("stop")
 		.data([
 			{offset: percentage, color: "#e15759"},
-			{offset: percentage, color: "#bcd8ec"},
+			{offset: percentage, color: "#fec9c9"},
 		])
 		.enter().append("stop")
 		.attr("offset", function(d) { return d.offset; })
@@ -320,7 +320,7 @@ function anomalieschart(data, {
 function forecast(data, {
     x,
     y,
-    curve = d3.curveBasis, // method of interpolation between points
+    curve = d3.curveLinear, // method of interpolation between points
     marginTop = 20, // top margin, in pixels
     marginRight = 0, // right margin, in pixels
     marginBottom = 30, // bottom margin, in pixels
@@ -336,15 +336,16 @@ function forecast(data, {
     xLabel = "Date →",
     yLabel = "↑ Total",
     yFormat, // a format specifier string for the y-axis
-    color = "currentColor", // fill color of area
+    color = "#b00", // fill color of area
 	  strokeLinecap = "round", // stroke line cap of the line
     strokeLinejoin = "round", // stroke line join of the line
-    strokeWidth = 1.5, // stroke width of line, in pixels
+    strokeWidth = 2, // stroke width of line, in pixels
     strokeOpacity = 1, // stroke opacity of line
     div,
     forecastdate,
     fit,
-    forecast 
+    forecast,
+    defined 
   } = {}) {
     // Compute values.
     const l5 = data[y][0];
@@ -360,18 +361,19 @@ function forecast(data, {
 	
     const X = d3.map(data[x], d => new Date(d))
     const I = d3.range(data.date.length)
+    if (defined === undefined) defined = (d, i) => obs[i] !== "NA";
+    const D = d3.map(obs, defined);
     let forecaststart = data[x].indexOf(forecastdate)
     
 
     if (xDomain === undefined) xDomain = d3.extent(forecast ? X.slice(forecaststart + 1) : X)
-    if (yDomain === undefined) yDomain = [d3.min(d3.map(data[y], d => d3.min(d))) < 0 ? d3.min(d3.map(data[y], d => d3.min(d))) : 0, d3.max(d3.map(data[y], d => d3.max(d)))];
+    if (yDomain === undefined) yDomain = [0, d3.max([d3.max(obs.filter(v => v != "NA")), d3.max(l95)]) ];
     // Construct scales and axes.
-    console.log(l95)
     const xScale = xType(xDomain, xRange);
     const yScale = yType(yDomain, yRange);
     const xAxis = d3.axisBottom(xScale).ticks(width / 80).tickSizeOuter(0);
     const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
-    console.log(X[forecaststart])
+
     // Construct an area generator.
     const area95 = d3.area()
         .curve(curve)
@@ -405,9 +407,10 @@ function forecast(data, {
 		.y(i => yScale(l50[(i - X.length) + I.slice(forecaststart + 1).length]));
 
   const obs_data = d3.line()
+    .defined(i => D[i])
 		.curve(curve)
 		.x(i => xScale(X[i]))
-		.y(i => yScale(obs[i] == "NA" ? 0 : obs[i]));
+		.y(i => yScale(obs[i]));
         
 	const svg = d3.select(div)
 		.append("svg")
@@ -436,10 +439,15 @@ function forecast(data, {
     svg.append("g")
         .attr("transform", `translate(${marginLeft},0)`)
         .call(yAxis)                        
-        .call(g => g.select(".domain").remove())
+        // .call(g => g.select(".domain").remove())
+        // .call(g => g.selectAll(".tick line").clone()
+        //   .attr("x2", width - marginLeft - marginRight)
+        //   .attr("stroke", "#eee")
+        //   .attr("stroke-width", 2)
+        //   .attr("stroke-opacity", 0.3))
         .call(g => g.append("text")
             .attr("x", 10)
-            .attr("y",12)
+            .attr("y",5)
             .attr("font-size", "1.25em")
             .attr("font-weight", "600")
             .attr("fill", "currentColor")
@@ -447,24 +455,54 @@ function forecast(data, {
             .text(yLabel));
 
 	if (!forecast) {
-		// svg.append("path")
-		// 	.attr("fill", "#ddd")
-		// 	.attr("d", area95(I.slice(0,forecaststart + 1)));
+
+		// svg.append("g")
+		// 	.attr("fill", "#000")
+		// 	.selectAll("circle")
+		// 	.data(d3.filter(I.slice(0,forecaststart+1), i => obs[i] == "NA"))
+		// 	.join("circle")
+		// 		.attr("cx", i => xScale(X[i]))
+		// 		.attr("cy", i => yScale(obs[i] == "NA" ? 0 : obs[i]))
+		// 		.attr("r", 3)
+    //     .attr("stroke", "white")
+    //     .attr("stroke-width", 1.5)
+
+    svg.append("g")
+        .selectAll("rect")
+        .data(d3.filter(I.slice(0,forecaststart+1), i => obs[i] == "NA"))
+        .join("rect")
+            .attr("x", i => xScale(X[i]) - 3)
+            .attr("y", yScale(yDomain[1]))
+            .attr("height", yScale(0) - yScale(yDomain[1]))
+            .attr("width", xScale(X[1]) - xScale(X[0]))
+			      .attr("fill", "#f2f2f2")
+            // .attr("opacity", 0.5);
+
+    // svg.append("path")
+    //     .attr("fill", "none")
+    //     .attr("stroke", "#43718f60")
+    //     .attr("stroke-dasharray", "5,5")
+    //     .attr("stroke-width", strokeWidth)
+    //     .attr("stroke-linecap", strokeLinecap)
+    //     .attr("stroke-linejoin", strokeLinejoin)
+    //     .attr("stroke-opacity", strokeOpacity)
+    //     .attr("d", obs_data(I.slice(0,forecaststart+1).filter(i => D[i])));
 
     svg.append("path")
         .attr("fill", "none")
-        .attr("stroke", "#43718f")
+        .attr("stroke", "#b00")
         .attr("stroke-width", strokeWidth)
         .attr("stroke-linecap", strokeLinecap)
         .attr("stroke-linejoin", strokeLinejoin)
         .attr("stroke-opacity", strokeOpacity)
         .attr("d", obs_data(I.slice(0,forecaststart+1)));
-		
-		svg.append("line")
+
+    
+    svg.append("line")
 			.attr("x1", xScale(X[forecaststart])) 
-			.attr("y1", 0)
+			.attr("y1", -8)
 			.attr("x2", xScale(X[forecaststart])) 
-			.attr("y2", height - marginBottom)
+			.attr("y2", yScale(0))
 				.style("stroke-width", 1)
 				.style("stroke", "#ccc")
 				.style("fill", "none")
@@ -472,65 +510,56 @@ function forecast(data, {
 		
 		svg.append("text")
         .attr("x", xScale(X[forecaststart]) + 10) 
-        .attr("y", marginBottom)
-      .style("font-weight", "bolder")
-      .style("font-size", "0.825em")
+        .attr("y", 5)
+      .style("font-weight", 500)
+      .style("font-size", "0.725em")
       .style("fill", "#4e79a7")
       .append("tspan")
         .attr('x', xScale(X[forecaststart]) + 10)
 			  .text("Forecast")
       .append("tspan")
         .attr('x', xScale(X[forecaststart]) + 10)
-        .attr('dy', 14)
+        .attr('dy', 10)
         .text("→")
 			// .text("Forecast ")
 				
 
 		svg.append("text")
-        .attr("x", xScale(X[forecaststart + 1]) - 100) 
-        .attr("y", marginBottom)
-      .style("font-weight", "bolder")
-      .style("font-size", "0.825em")
+        .attr("x", xScale(X[forecaststart + 1]) - 80) 
+        .attr("y", 5)
+      .style("font-weight", 500)
+      .style("font-size", "0.725em")
       .style("fill", "#aaa")
       .append("tspan")
-        .attr('x', xScale(X[forecaststart]) - 80)
+        .attr('x', xScale(X[forecaststart]) - 55)
 			  .text("Observed")
       .append("tspan")
-        .attr('x', xScale(X[forecaststart]) - 25)
-        .attr('dy', 14)
+        .attr('x', xScale(X[forecaststart]) - 18)
+        .attr('dy', 10)
         .text("←")
 
-		// svg.append("g")
-		// 	.attr("fill", "#000")
-		// 	.selectAll("circle")
-		// 	.data(I.slice(0,forecaststart))
-		// 	.join("circle")
-		// 		.attr("cx", i => xScale(X[i]))
-		// 		.attr("cy", i => yScale(modelFit[i]))
-		// 		.attr("r", i => modelFit[i] == "NA" ? 0 : 3.5)
-    //     .attr("stroke", "white")
-    //     .attr("stroke-width", 1.5)
+    
 	}
 
 	svg.append("path")
-		.attr("fill", "#d5eeff")
+		.attr("fill", "#fec9c9")
 		.attr("d", area95(I.slice(forecaststart + 1)));
 
     svg.append("path")
-		.attr("fill", "#bcd8ec")
+		.attr("fill", "#ffa1a1")
 		.attr("d", area80(I.slice(forecaststart + 1)));
 	
 	svg.append("path")
-		.attr("fill", "#a4c3d8")
+		.attr("fill", "#ff8080")
 		.attr("d", area70(I.slice(forecaststart + 1)));
 
 	svg.append("path")
-		.attr("fill", "#8baec6")
+		.attr("fill", "#ff6868")
 		.attr("d", area60(I.slice(forecaststart + 1)));
 	
 	svg.append("path")
         .attr("fill", "none")
-        .attr("stroke", "#43718f")
+        .attr("stroke", "#b00")
         .attr("stroke-width", strokeWidth)
         .attr("stroke-linecap", strokeLinecap)
         .attr("stroke-linejoin", strokeLinejoin)
@@ -1003,8 +1032,6 @@ function forecasttrend(data, {
             .attr("text-anchor", "start")
             .text(yLabel));
 
-	
-
     svg.append("g")
         .selectAll("rect")
         .data(I)
@@ -1013,20 +1040,21 @@ function forecasttrend(data, {
             .attr("y", i => yScale(Y[i]))
             .attr("height", i => yScale(0) - yScale(Y[i]))
             .attr("width", xScale.bandwidth())
-			.attr("fill", i => Y[i] < 0.7 ? "#bcd8ec" : "#e15759");
+			.attr("fill", i => Y[i] < 0.7 ? "#fec9c9" : "#e15759");
+
     svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
         .call(xAxis);
 	
-	svg.append("line")
-		.attr("x1", marginLeft)  
-		.attr("y1", yScale(0.7))
-		.attr("x2", width)  
-		.attr("y2", yScale(0.7))
-    .style("stroke-width", 1)
-    .style("stroke", "#777")
-    .style("fill", "none")
-    .style("stroke-dasharray", 3);
+    svg.append("line")
+      .attr("x1", marginLeft)  
+      .attr("y1", yScale(0.7))
+      .attr("x2", width)  
+      .attr("y2", yScale(0.7))
+      .style("stroke-width", 1)
+      .style("stroke", "#777")
+      .style("fill", "none")
+      .style("stroke-dasharray", 3);
   
     return svg.node();
 }
