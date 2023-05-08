@@ -402,9 +402,7 @@ plotMap = risk => {
                 let myIcon = title => {
                     let icon = new L.DivIcon({
                         className: 'name-text',
-                        html: `<svg overflow="visible" xmlns="http://www.w3.org/2000/svg">
-                                    <text overflow="visible" y="12" >${title}</text>
-                                </svg>`
+                        html: `<text overflow="visible" y="12" >${title}</text>`
                     })
                     return icon
                 }

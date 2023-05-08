@@ -3,7 +3,6 @@ let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oc
 function getdim(div) {
   width = $(div).width();
   height = $(div).height();
-  console.log(div, width, height)
   return { width, height }
 }
 
@@ -32,8 +31,6 @@ function percentageworse(data, {
 	const X = data[x];
 	const Y = data[y];
 	const I = d3.range(X.length);
-	console.log(height, width)
-	console.log(percentage)
 	// Compute default domains.
 	if (xDomain === undefined) xDomain = d3.extent(X);
 	if (yDomain === undefined) yDomain = [0, d3.max(Y)];
@@ -135,7 +132,7 @@ function anomalieschart(data, {
     // console.log(xDomain, yDomain, zDomain)
     // Omit any data not present in the z-domain.
     const I = d3.range(X.length).filter(i => zDomain.has(Z[i]));
-    console.log(div)
+
     // Construct scales and axes.
     const xScale = xType(xDomain, xRange);
     const yScale = yType(yDomain, yRange);
@@ -290,7 +287,7 @@ function anomalieschart(data, {
         .attr("x", 0)
         .attr("y", -30)
 		.attr("font-weight", "bold");
-		console.log(Y)
+
     function pointermoved(event) {
       const [xm, ym] = d3.pointer(event);
       const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(Y[i]) - ym)); // closest point
@@ -1099,7 +1096,6 @@ function linechart(data, {
   if (defined === undefined) defined = (d, i) => !isNaN(Y[i]);
   const D = d3.map(data, defined);
   d3.select(div).select("svg").remove()
-console.log(d3.map(data, x))
   // Compute default domains, and unique the z-domain.
   if (xDomain === undefined) xDomain = d3.extent(X);
   if (yDomain === undefined) yDomain = [0, d3.max(Y, d => typeof d === "string" ? +d : d)];
@@ -1110,7 +1106,7 @@ console.log(d3.map(data, x))
   // console.log(xDomain, yDomain, zDomain)
   // Omit any data not present in the z-domain.
   const I = d3.range(X.length).filter(i => zDomain.has(Z[i]));
-  console.log(div)
+
   // Construct scales and axes.
   const xScale = xType(xDomain, xRange);
   const yScale = yType(yDomain, yRange);
@@ -1156,11 +1152,12 @@ console.log(d3.map(data, x))
       .call(yAxis)
       .call(g => g.select(".domain").remove())
       .call(g => g.append("text")
-          .attr("x", 0)
-          .attr("y",12)
+          .attr("x", -15)
+          .attr("y", -30)
           .attr("font-size", "1.25em")
           .attr("font-weight", "600")
           .attr("fill", "currentColor")
+          .attr("transform", "rotate(-90)")
           // .attr("text-anchor", "start")
           .text(yLabel));
   
@@ -1188,9 +1185,11 @@ console.log(d3.map(data, x))
   dot.append("rect")
       .attr("class", "tooltip-line")
       .attr("width", 100)
-      .attr("height", Z[1] == undefined ? 50 : 70)
+      // .attr("height", Z[1] == undefined ? 50 : 70)
+      .attr("height", 50 )
       .attr("x", -50)
-      .attr("y", Z[1] == undefined ? -70 : -90)
+      // .attr("y", Z[1] == undefined ? -70 : -90)
+      .attr("y", -70)
       .attr("rx", 4)
       .attr("ry", 4)
   .attr("fill", "#fff")
@@ -1201,11 +1200,11 @@ console.log(d3.map(data, x))
       .attr("x", -45)
       .attr("y", -50);
 
-dot.append("text")
-      .attr("class", "tooltip-strata")
-      .attr("x", -45)
-      .attr("y", -70)
-  .attr("font-weight", "bold");
+// dot.append("text")
+//       .attr("class", "tooltip-strata")
+//       .attr("x", -45)
+//       .attr("y", -70)
+//   .attr("font-weight", "bold");
 
   dot.append("text")
       .attr("x", -45)
@@ -1223,7 +1222,7 @@ dot.append("text")
     const i = d3.least(I, i => Math.hypot(xScale(X[i]) - xm, yScale(Y[i]) - ym)); // closest point
     path.style("stroke", ([z]) => Z[i] === z ? null : "#ddd").filter(([z]) => Z[i] === z).raise();
     dot.attr("transform", `translate(${xScale(X[i])},${yScale(Y[i])})`);
-    dot.select(".tooltip-date").text(months[X[i].getMonth()] + ", " + X[i].getFullYear());
+    dot.select(".tooltip-date").text(X[i].getFullYear());
   dot.select(".tooltip-strata").text(Z[i]);
     dot.select(".tooltip-count").text(Y[i]);
     svg.property("value", O[i]).dispatch("input", {bubbles: true});
